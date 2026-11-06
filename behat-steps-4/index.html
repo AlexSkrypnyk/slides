@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Behat Steps 4: Drupal 12-ready testing in 1 package</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /*
+     * DrevOps slide deck, built from Branding/Slides/Template.html.
+     * Palette is driven by the :root variables below.
+     */
+    :root {
+      --deck-darker: #030D1E;
+      --deck-dark:   #152235;
+      --deck-panel:  #2B394D;
+      --deck-light:  #F4F8FD;
+      --deck-white:  #FFFFFF;
+
+      --deck-text:       #152235;
+      --deck-muted:      #5B6A80;
+      --deck-soft:       #75849C;
+      --deck-warm:       #EFF6FF;
+      --deck-warm-muted: #ABBCD5;
+
+      --accent:        #1E7582;
+      --accent-dim:    #045A65;
+      --accent-bright: #96E7F4;
+
+      --slop:        #CD5B43;
+      --slop-bright: #FF9C86;
+
+      --code-bg: #0E1B2A;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { margin: 0; padding: 0; }
+
+    body {
+      font-family: "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--deck-text);
+      background: var(--deck-light);
+      scroll-snap-type: y mandatory;
+      overflow-y: scroll;
+      height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      letter-spacing: -0.01em;
+    }
+
+    .slide {
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      height: 100vh;
+      max-height: 100vh;
+      padding: 5vh 7vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: var(--deck-light);
+      position: relative;
+      overflow: hidden;
+    }
+
+    h1, h2, h3, .kicker, .byline, .step-badge, .col-label,
+    .workflow-label, .stat-number, .tool-card h3 {
+      font-family: "Plus Jakarta Sans", sans-serif;
+    }
+
+    .slide h1 { font-size: clamp(2.5rem, 5.5vw, 4.75rem); margin-bottom: 1rem; }
+    .slide h2 { font-size: clamp(1.85rem, 3.75vw, 3.25rem); margin-bottom: 1rem; }
+    .slide h2.big { font-size: clamp(2.25rem, 4.5vw, 3.85rem); margin-bottom: 1rem; }
+    .slide p { font-size: clamp(1.05rem, 1.45vw, 1.5rem); line-height: 1.45; margin-bottom: 0.75rem; }
+    .slide .lede { font-size: clamp(1.25rem, 1.9vw, 1.95rem); margin-bottom: 1rem; }
+    .slide .kicker { margin-bottom: 1.25rem; }
+    .slide ul.lead { font-size: clamp(1.05rem, 1.55vw, 1.5rem); }
+    .slide ul.lead li { margin-bottom: 0.4rem; }
+    .slide hr { margin: 0.85rem 0; }
+
+    .slide.dark { background: var(--deck-dark); color: var(--deck-warm); }
+    .slide.dark.section-divider { background: var(--deck-darker); }
+    .slide.dark .kicker { color: var(--accent-bright); }
+    .slide.dark .quiet { color: var(--deck-warm-muted); }
+    .slide.dark h2, .slide.dark h1 { color: var(--accent-bright); }
+    .slide.dark p { color: var(--deck-warm); }
+
+    .slide-footer {
+      position: absolute;
+      bottom: 2.2vh;
+      left: 3vw;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      z-index: 5;
+      opacity: 0.92;
+      color: var(--deck-text);
+    }
+    .slide.dark .slide-footer { color: var(--deck-warm); }
+
+    .slide-footer .deck-logo { height: 24px; width: auto; display: block; color: inherit; }
+    .slide-footer .deck-logo svg { height: 100%; width: auto; display: block; }
+
+    .slide-footer .sep { width: 1px; height: 20px; background: currentColor; opacity: 0.3; }
+    .slide-footer .venue {
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; opacity: 0.75;
+    }
+
+    .slide.title .slide-footer,
+    .slide.thanks .slide-footer { display: none; }
+
+    .kicker {
+      font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.22em;
+      color: var(--accent); margin: 0 0 2.25rem; font-weight: 800;
+    }
+
+    h1 {
+      font-size: clamp(3rem, 7vw, 6rem); font-weight: 800; margin: 0 0 1.5rem;
+      line-height: 0.99; letter-spacing: -0.035em; max-width: 22ch;
+    }
+    h2 {
+      font-size: clamp(2.25rem, 4.75vw, 4.25rem); font-weight: 700; margin: 0 0 1.5rem;
+      line-height: 1.03; letter-spacing: -0.03em;
+    }
+    h2.big { font-size: clamp(2.75rem, 5.75vw, 5rem); max-width: 30ch; }
+    h1.huge { font-size: clamp(5rem, 14vw, 12.5rem); max-width: none; letter-spacing: -0.05em; font-weight: 800; }
+
+    p { font-size: clamp(1.2rem, 1.75vw, 1.75rem); line-height: 1.5; margin: 0 0 1rem; max-width: 60ch; }
+
+    .lede {
+      font-size: clamp(1.5rem, 2.4vw, 2.4rem); font-weight: 500; line-height: 1.32;
+      max-width: 42ch; letter-spacing: -0.012em;
+    }
+
+    .quiet { color: var(--deck-muted); }
+    .accent { color: var(--accent); }
+    .slide.dark .accent { color: var(--accent-bright); }
+
+    ul.lead {
+      font-size: clamp(1.2rem, 1.85vw, 1.75rem); line-height: 1.5; margin: 0 0 1rem;
+      padding: 0; list-style: none; max-width: 60ch; font-weight: 500;
+    }
+    ul.lead li { padding-left: 1.75rem; position: relative; margin-bottom: 0.55rem; }
+    ul.lead li::before {
+      content: ""; position: absolute; left: 0; top: 0.62em; width: 0.55rem; height: 0.55rem;
+      background: var(--accent); border-radius: 50%;
+    }
+    .slide.dark ul.lead li::before { background: var(--accent-bright); }
+
+    .byline { font-size: clamp(1.1rem, 1.55vw, 1.4rem); font-weight: 600; letter-spacing: 0; margin-top: 1.75rem; }
+
+    .slide.title { padding: 0; flex-direction: row; overflow: hidden; }
+    .title-left {
+      flex: 1 1 58%; background: var(--deck-darker); color: var(--deck-warm);
+      padding: 9vh 5.5vw; display: flex; flex-direction: column; justify-content: center; position: relative;
+    }
+    .title-left .deck-logo { height: 30px; width: auto; margin-bottom: 2.75rem; color: var(--deck-warm); align-self: flex-start; }
+    .title-left .deck-logo svg { height: 100%; width: auto; display: block; }
+    .title-left h1 { color: var(--deck-warm); max-width: 16ch; }
+    .title-left h1 .accent { color: var(--accent-bright); }
+    .title-left .lede { color: var(--deck-warm-muted); max-width: 30ch; }
+    .title-left .byline { color: var(--deck-warm); margin-top: 1.75rem; }
+    .title-left .byline small { display: block; font-weight: 500; color: var(--deck-warm-muted); font-size: 0.8em; margin-top: 0.3rem; }
+
+    .title-right {
+      flex: 0 0 42%;
+      background:
+        radial-gradient(circle at 62% 42%, color-mix(in srgb, var(--accent) 55%, transparent) 0%, transparent 46%),
+        linear-gradient(150deg, var(--deck-dark) 0%, var(--accent-dim) 100%);
+      overflow: hidden; position: relative;
+    }
+    .title-right::before,
+    .title-right::after {
+      content: ""; position: absolute; top: 42%; left: 62%; transform: translate(-50%, -50%);
+      border-radius: 50%; border: 2px solid color-mix(in srgb, var(--accent-bright) 40%, transparent);
+    }
+    .title-right::before { width: 46vh; height: 46vh; }
+    .title-right::after { width: 30vh; height: 30vh; border-color: color-mix(in srgb, var(--accent-bright) 60%, transparent); }
+    .title-orbit {
+      position: absolute; top: 42%; left: 62%; transform: translate(-50%, -50%);
+      width: 16vh; height: 16vh; border-radius: 50%;
+      background: color-mix(in srgb, var(--accent-bright) 22%, transparent);
+      box-shadow: 0 0 60px color-mix(in srgb, var(--accent-bright) 45%, transparent);
+    }
+
+    .slide.thanks {
+      align-items: center; justify-content: center; text-align: center;
+      background: var(--deck-darker); color: var(--deck-warm);
+    }
+    .slide.thanks h1.huge { color: var(--accent-bright); margin-bottom: 2.5rem; }
+    .slide.thanks .lede { color: var(--deck-warm); }
+    .slide.thanks .quiet { color: var(--deck-warm-muted); }
+    .slide.thanks .deck-logo { height: 26px; width: auto; margin-top: 3rem; color: var(--deck-warm); opacity: 0.9; }
+    .slide.thanks .deck-logo svg { height: 100%; width: auto; }
+
+    pre.code {
+      font-family: "Fira Code", ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: clamp(0.82rem, 1.1vw, 1.05rem); line-height: 1.6;
+      background: var(--code-bg); color: var(--deck-warm);
+      padding: 1.25rem 1.75rem; border-left: 5px solid var(--accent-bright);
+      overflow: auto; white-space: pre; margin: 0.75rem 0; max-width: min(95ch, 100%);
+      tab-size: 2; box-shadow: 0 2px 12px rgba(3, 13, 30, 0.14); border-radius: 0 6px 6px 0;
+    }
+    pre.code .c { color: var(--deck-soft); font-style: italic; }
+    pre.code .k { color: var(--accent-bright); }
+    pre.code .s { color: var(--slop-bright); }
+    .code-caption {
+      color: var(--deck-muted); font-size: clamp(1.15rem, 1.6vw, 1.5rem); font-weight: 500;
+      margin: 0; max-width: 42ch; line-height: 1.35;
+    }
+    .slide.dark .code-caption { color: var(--deck-warm-muted); }
+    .slide.dark pre.code { background: #0A1524; }
+
+    code {
+      font-family: "Fira Code", ui-monospace, monospace; font-size: 0.9em;
+      background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent);
+      padding: 0.1em 0.4em; border-radius: 3px; font-weight: 500;
+    }
+    .slide.dark code { background: color-mix(in srgb, var(--accent-bright) 16%, transparent); color: var(--accent-bright); }
+
+    hr { border: 0; border-top: 3px solid var(--accent); margin: 1.5rem 0; max-width: 5rem; }
+    .slide.dark hr { border-top-color: var(--accent-bright); }
+
+    a {
+      color: inherit; text-decoration: underline; text-underline-offset: 4px;
+      text-decoration-thickness: 2px; text-decoration-color: var(--accent);
+    }
+    .slide.dark a { text-decoration-color: var(--accent-bright); }
+
+    .slide-number {
+      position: fixed; bottom: 1rem; right: 1.5rem; font-family: "Fira Code", monospace;
+      font-size: 0.7rem; color: var(--deck-muted); background: color-mix(in srgb, var(--deck-light) 90%, transparent);
+      padding: 0.25rem 0.55rem; user-select: none; pointer-events: none; z-index: 100;
+      font-weight: 500; letter-spacing: 0.06em;
+    }
+
+    @media print {
+      body { scroll-snap-type: none; overflow: visible; height: auto; }
+      .slide { page-break-after: always; min-height: 100vh; height: auto; overflow: visible; }
+      .slide.code-split, .slide.meme-split { flex-direction: column !important; align-items: flex-start; gap: 1.5rem; }
+      .slide.code-split .code-text, .slide.code-split .slide-text, .slide.code-split pre.code, .slide.meme-split .meme-text { flex: none !important; max-width: 100% !important; width: 100%; }
+      .slide.meme-split .meme-img, .slide.meme-split .img-placeholder { flex: none; max-width: 100%; max-height: 40vh; width: auto; margin: 1rem 0; }
+      pre.code, pre.terminal, pre.diff { white-space: pre-wrap; overflow: visible; }
+      .slide-number { display: none; }
+    }
+
+    .punchline {
+      font-size: clamp(1.65rem, 2.5vw, 2.2rem); font-weight: 600; line-height: 1.3;
+      letter-spacing: -0.015em; color: var(--deck-text); margin-top: 1.25rem;
+      text-decoration: underline; text-decoration-color: var(--accent);
+      text-decoration-thickness: 4px; text-underline-offset: 0.35em; text-decoration-skip-ink: none;
+    }
+    .slide.dark .punchline { color: var(--deck-warm); text-decoration-color: var(--accent-bright); }
+
+    .step-badge {
+      display: inline-block; background: var(--accent); color: #fff; font-size: 0.75rem;
+      font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.2rem 0.65rem;
+      border-radius: 3px; margin-bottom: 1.2rem; font-family: "Fira Code", monospace;
+    }
+    .slide.dark .step-badge { background: var(--accent-bright); color: var(--deck-darker); }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 3vw; align-items: start; max-width: 120ch; }
+    .two-col .col-label {
+      font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.18em;
+      color: var(--deck-soft); margin-bottom: 0.6rem;
+    }
+    .two-col .col-label.good { color: var(--accent); }
+    .two-col > div { min-width: 0; }
+    .two-col pre.code { max-width: 100%; }
+
+    .slide.meme-split { flex-direction: row; align-items: center; gap: 4vw; padding: 8vh 6vw; }
+    .slide.meme-split .meme-text { flex: 1 1 46%; max-width: 46%; min-width: 0; }
+    .meme-img { max-width: min(700px, 60vw); max-height: 62vh; width: auto; height: auto; border-radius: 8px; box-shadow: 0 6px 26px rgba(3, 13, 30, 0.22); margin: 1rem 0; display: block; }
+    .slide.meme-split .meme-img { flex: 0 0 auto; max-width: 40%; max-height: 60vh; width: auto; margin: 0 auto; }
+
+    .slide.code-split { flex-direction: row; align-items: center; gap: 3vw; padding: 8vh 6vw; }
+    .slide.code-split .code-text, .slide.code-split .slide-text { flex: 1 1 40%; max-width: 40%; min-width: 0; }
+    .slide.code-split pre.code { flex: 0 0 56%; max-width: 56%; max-height: 78vh; margin: 0; min-width: 0; }
+    .slide.code-split.code-split-reverse { flex-direction: row-reverse; }
+    @media (max-width: 900px) {
+      .slide.code-split, .slide.meme-split { flex-direction: column; }
+      .slide.code-split .code-text, .slide.code-split .slide-text, .slide.code-split pre.code,
+      .slide.meme-split .meme-text, .slide.meme-split .meme-img { flex: none; max-width: 100%; }
+    }
+
+    .timeline { position: relative; width: 100%; padding: 0 0 1rem; margin-top: 1.5rem; min-height: 11rem; display: grid; grid-template-columns: repeat(6, 1fr); gap: 0; }
+    .timeline-track { position: absolute; top: 4.375rem; left: 8.333%; right: 8.333%; height: 5px; background: linear-gradient(90deg, var(--accent) 0%, var(--accent-bright) 100%); border-radius: 3px; z-index: 1; transform: translateY(-50%); }
+    .timeline-point { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; position: relative; z-index: 2; padding: 5.5rem 0.5rem 0; }
+    .timeline-point::before { content: ""; width: 1.75rem; height: 1.75rem; background: var(--deck-light); border-radius: 50%; border: 4px solid var(--accent); box-shadow: 0 0 12px rgba(3, 13, 30, 0.16); position: absolute; top: 4.375rem; left: 50%; transform: translate(-50%, -50%); z-index: 2; }
+    .timeline-point:last-child::before { background: var(--accent-bright); border-color: var(--accent); width: 2rem; height: 2rem; box-shadow: 0 0 16px color-mix(in srgb, var(--accent-bright) 50%, transparent); }
+    .timeline-point .year { font-family: "Plus Jakarta Sans", sans-serif; font-weight: 800; font-size: clamp(1.25rem, 2vw, 1.85rem); color: var(--accent); letter-spacing: -0.02em; margin-top: 0.75rem; line-height: 1; }
+    .timeline-point .label { font-size: clamp(0.82rem, 1.05vw, 1rem); text-align: center; line-height: 1.3; color: var(--deck-muted); font-weight: 500; }
+
+    .slide.section-divider { justify-content: center; align-items: flex-start; }
+    .slide.section-divider .kicker { margin-bottom: 1.5rem; }
+    .slide.section-divider h1 { font-size: clamp(4rem, 10vw, 8rem); line-height: 0.95; letter-spacing: -0.035em; max-width: 18ch; }
+
+    .tool-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; margin: 1.5rem 0; max-width: 82rem; width: 100%; }
+    .tool-card { padding: 1.25rem 1.4rem; background: color-mix(in srgb, var(--accent) 6%, transparent); border-left: 4px solid var(--accent); border-radius: 4px; }
+    .tool-card h3 { font-size: clamp(0.98rem, 1.35vw, 1.22rem); font-weight: 800; color: var(--accent); margin: 0 0 0.5rem; letter-spacing: -0.01em; }
+    .tool-card h3 code, .tool-card h3 .mono { font-family: "Fira Code", monospace; font-size: 0.92em; background: none; color: inherit; padding: 0; }
+    .tool-card p { font-size: clamp(1rem, 1.3vw, 1.2rem); color: var(--deck-muted); line-height: 1.4; margin: 0; }
+    .tool-card .url { margin: 0.55rem 0 0; font-family: "Fira Code", monospace; font-size: clamp(0.78rem, 1vw, 0.92rem); color: var(--accent); opacity: 0.85; }
+    @media (max-width: 1100px) { .tool-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .tool-url { margin-top: 1.5rem; font-family: "Fira Code", monospace; font-size: clamp(1.1rem, 1.9vw, 1.8rem); color: var(--accent); word-break: break-all; letter-spacing: -0.01em; }
+    .slide.dark .tool-url { color: var(--accent-bright); }
+
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 1.5rem 0; max-width: 60rem; }
+    .stat-card { background: color-mix(in srgb, var(--accent) 8%, transparent); border-left: 5px solid var(--accent); padding: 1.3rem 1.6rem; border-radius: 4px; }
+    .stat-number { font-size: clamp(2.5rem, 4.5vw, 4.25rem); font-weight: 800; line-height: 1; letter-spacing: -0.04em; color: var(--accent); margin-bottom: 0.4rem; }
+    .stat-label { font-size: clamp(1rem, 1.25vw, 1.15rem); font-weight: 600; color: var(--deck-text); margin: 0 0 0.4rem; line-height: 1.3; }
+    .stat-source { font-size: clamp(0.78rem, 0.95vw, 0.9rem); color: var(--deck-soft); font-family: "Fira Code", monospace; margin: 0; }
+    @media (max-width: 900px) { .stat-grid, .two-col { grid-template-columns: 1fr; } }
+
+    .layer-list { display: flex; flex-direction: column; gap: 0.55rem; width: 100%; max-width: 84rem; margin: 1.25rem 0; }
+    .layer-row { display: grid; grid-template-columns: minmax(8.5rem, auto) 1fr; gap: 1.5rem; align-items: start; padding: 0.65rem 1.1rem; background: color-mix(in srgb, var(--accent) 5%, transparent); border-left: 4px solid var(--accent); border-radius: 4px; }
+    .layer-row .lr-tag { font-family: "Fira Code", monospace; font-size: clamp(0.78rem, 1vw, 0.95rem); font-weight: 700; color: var(--accent); white-space: nowrap; }
+    .layer-row .lr-title { font-family: "Plus Jakarta Sans", sans-serif; font-weight: 700; font-size: clamp(1rem, 1.3vw, 1.2rem); }
+    .layer-row .lr-desc { color: var(--deck-muted); font-size: clamp(0.9rem, 1.15vw, 1.08rem); line-height: 1.35; margin-top: 0.1rem; }
+    .layer-row.live { border-left-style: dashed; border-left-color: color-mix(in srgb, var(--accent) 60%, transparent); background: transparent; }
+    .layer-row.live .lr-tag { color: var(--deck-soft); }
+    @media (max-width: 900px) { .layer-row { grid-template-columns: 1fr; gap: 0.2rem; } }
+  </style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="drevops-logo" viewBox="0 0 5267 1247">
+    <path fill="currentColor" d="M1011.19 597.403C988.318 508.771 942.368 429.419 880.123 366.132L514.068 0.0761719L146.414 367.726C-10.518 528.674 -41.1878 767.448 56.2944 958.829C141.151 1125.42 314.272 1239.52 514.051 1239.52C713.829 1239.52 886.957 1125.41 971.82 958.812C984.806 933.317 1060.17 787.162 1011.19 597.4L1011.19 597.403ZM614.259 200.469L664.358 250.568L338.975 575.951C335.175 579.75 331.62 583.797 328.4 588.1C276.857 656.973 282.457 730.538 282.511 732.616C285.752 857.493 388.011 957.732 513.677 957.732C639.343 957.732 742.013 857.085 744.849 731.844C744.972 726.467 749.67 636.471 680.886 567.69L564.163 450.967L564.554 450.57L614.266 400.868C614.266 400.868 732.514 517.708 741.842 528.444C841.247 642.89 813.129 771.868 807.793 794.785C776.712 928.266 656.999 1027.71 514.054 1027.71C371.109 1027.71 251.403 928.273 220.322 794.806C182.536 632.548 289.442 524.837 291.475 522.584C291.561 522.491 614.255 200.472 614.259 200.465V200.469ZM620.092 607.084C629.878 615.807 673.904 656.504 673.613 727.163C673.25 815.36 599.339 887.768 511.153 886.404C423.985 885.052 353.737 813.974 353.737 726.488C353.737 688.137 367.231 652.944 389.739 625.391C396.56 617.035 514.071 501.059 514.071 501.059L620.095 607.084H620.092ZM945.139 831.157C945.063 831.473 919.523 906.299 919.455 906.447C850.359 1061.57 694.832 1169.7 514.051 1169.7C333.269 1169.7 177.76 1061.58 108.663 906.46C108.612 906.333 108.55 906.213 108.499 906.086C67.9019 807.548 70.8063 743.767 70.7686 742.937C70.7686 742.937 56.0132 576.757 179.354 434.977C185.815 427.55 192.518 420.346 199.459 413.367L514.068 100.271L564.167 150.37L237.175 477.361C190.324 529.466 157.987 594.866 146.493 667.202C146.425 667.607 146.359 668.018 146.298 668.423C111.444 903.645 292.881 1098.31 514.054 1098.31C675.592 1098.31 813.095 995.407 864.586 851.571C884.471 796.02 890.801 726.2 881.807 668.403C870.457 595.452 837.914 529.507 790.668 477.07L664.358 350.759L714.457 300.66C714.457 300.66 834.424 418.525 848.634 434.837C959.256 561.82 973.045 716.293 945.135 831.151L945.139 831.157Z"/>
+    <path fill="currentColor" d="M1403.5 264.233H1635.17C1809.67 264.233 2001.91 380.561 2001.91 613.222C2001.91 845.882 1809.67 962.211 1635.17 962.211H1403.5V264.233ZM1474.48 897.147H1612.5C1825.44 897.147 1925.02 757.158 1925.02 613.222C1925.02 469.286 1825.44 329.3 1612.5 329.3H1474.48V897.147Z"/>
+    <path fill="currentColor" d="M2138.94 644.769C2138.94 603.363 2136.97 567.872 2135 500.837H2199.07V586.605H2201.05C2219.78 537.312 2268.09 489.006 2348.92 489.006C2367.65 489.006 2383.43 490.978 2397.23 494.922L2384.41 559.001C2376.53 556.045 2364.7 554.073 2346.95 554.073C2248.36 554.073 2204 639.842 2204 701.949V962.214H2138.94V644.773L2138.94 644.769Z"/>
+    <path fill="currentColor" d="M2498.77 749.271C2506.65 841.942 2576.65 914.893 2668.33 914.893C2737.34 914.893 2790.58 876.446 2816.21 835.039L2866.49 876.446C2812.26 945.456 2744.24 974.044 2668.33 974.044C2531.3 974.044 2429.75 870.53 2429.75 731.525C2429.75 592.52 2531.3 489.006 2662.41 489.006C2802.4 489.99 2883.24 593.504 2883.24 719.695V749.271H2498.76H2498.77ZM2812.27 696.034C2812.27 608.294 2756.08 548.158 2662.42 548.158C2577.64 548.158 2500.74 620.124 2500.74 696.034H2812.27H2812.27Z"/>
+    <path fill="currentColor" d="M3216.46 962.214H3143.5L2956.19 500.837H3034.08L3180.97 889.26H3182.94L3329.83 500.837H3403.77L3216.46 962.214Z"/>
+    <path fill="currentColor" d="M3840.49 979.959C3632.48 979.959 3476.72 825.181 3476.72 613.225C3476.72 401.27 3632.48 246.491 3840.49 246.491C4048.51 246.491 4204.27 401.27 4204.27 613.225C4204.27 825.181 4048.51 979.959 3840.49 979.959ZM3840.49 311.554C3661.07 311.554 3553.61 452.531 3553.61 613.222C3553.61 773.912 3661.07 914.893 3840.49 914.893C4019.92 914.893 4127.38 773.916 4127.38 613.222C4127.38 452.528 4019.92 311.554 3840.49 311.554Z"/>
+    <path fill="currentColor" d="M4334.4 500.837H4399.47V577.734H4401.44C4443.83 515.626 4519.74 489.01 4580.86 489.01C4724.8 489.01 4826.34 592.524 4826.34 731.529C4826.34 870.534 4724.8 974.048 4580.86 974.048C4519.74 974.048 4443.83 947.431 4401.44 885.32H4399.47V1246.14H4334.4V500.837ZM4580.86 548.158C4474.39 548.158 4396.51 628.011 4396.51 731.525C4396.51 835.039 4474.39 914.893 4580.86 914.893C4687.33 914.893 4755.36 835.039 4755.36 731.525C4755.36 628.011 4688.32 548.158 4580.86 548.158Z"/>
+    <path fill="currentColor" d="M5193.06 610.266C5173.34 572.803 5140.81 548.158 5093.49 548.158C5046.17 548.158 4997.86 567.875 4997.86 617.169C4997.86 660.547 5028.42 676.32 5088.56 690.123L5154.61 705.896C5218.69 720.683 5267 767.02 5267 832.083C5267 932.638 5177.29 974.044 5087.58 974.044C5017.58 974.044 4953.5 949.399 4910.12 884.332L4966.32 845.886C4992.93 887.292 5033.36 914.896 5087.58 914.896C5141.8 914.896 5196.02 891.235 5196.02 837.999C5196.02 791.665 5156.58 775.891 5108.28 764.061L5045.18 749.271C5013.63 741.384 4926.88 715.752 4926.88 628.011C4926.88 532.384 5010.68 489.006 5097.43 489.006C5161.51 489.006 5221.65 511.679 5251.22 571.819L5193.06 610.266H5193.06Z"/>
+  </symbol>
+</svg>
+
+<!-- 1. Title -->
+<section class="slide title">
+  <div class="title-left">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <h1>Behat Steps 4: <span class="accent">Drupal 12-ready</span> testing in 1 package</h1>
+    <p class="lede">Drupal Extension, Drupal Driver and Behat Steps, now a single library for Behat 4 and Drupal 12.</p>
+    <div class="byline">Alex Skrypnyk<small>Director, DrevOps · Drupal Meetup</small></div>
+  </div>
+  <div class="title-right"><span class="title-orbit"></span></div>
+</section>
+
+<!-- 2. The long road -->
+<section class="slide">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Drupal Meetup</span>
+  </div>
+  <p class="kicker">How we got here</p>
+  <h2>The long road to 4.0</h2>
+  <div class="timeline">
+    <div class="timeline-track"></div>
+    <div class="timeline-point"><div class="year">2012</div><div class="label">Drupal Extension, by Jonathan Hedstrom</div></div>
+    <div class="timeline-point"><div class="year">2014</div><div class="label">Drupal Driver follows</div></div>
+    <div class="timeline-point"><div class="year">2018</div><div class="label">Behat Steps, on top of both</div></div>
+    <div class="timeline-point"><div class="year">2025</div><div class="label">We start maintaining both</div></div>
+    <div class="timeline-point"><div class="year">2026</div><div class="label">3 packages, released in step</div></div>
+    <div class="timeline-point"><div class="year">4.0</div><div class="label">1 package</div></div>
+  </div>
+</section>
+
+<!-- 3. What Behat is -->
+<section class="slide">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Drupal Meetup</span>
+  </div>
+  <p class="kicker">New to Behat?</p>
+  <h2>Behat checks your website the way people use it</h2>
+  <p class="lede">Behat is a PHP tool for behaviour-driven development. You describe how your site should behave, in plain English, and Behat checks that it does.</p>
+  <div class="tool-grid">
+    <div class="tool-card"><h3>Plain-text scenarios</h3><p>Developers, testers and clients read the same file.</p></div>
+    <div class="tool-card"><h3>A browser to drive</h3><p>Mink drives a fast HTTP client, or a real browser when the page needs JavaScript.</p></div>
+    <div class="tool-card"><h3>Runs on every change</h3><p>In CI, a broken journey fails the build before it reaches your visitors.</p></div>
+  </div>
+</section>
+
+<!-- 4. Gherkin -->
+<section class="slide code-split">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Drupal Meetup</span>
+  </div>
+  <div class="code-text">
+    <p class="kicker">New to Behat?</p>
+    <h2>Gherkin: the language of a scenario</h2>
+    <ul class="lead">
+      <li><code>Feature</code> names what the site does</li>
+      <li><code>Scenario</code> is 1 example of it</li>
+      <li><code>Given</code> sets up, <code>When</code> acts, <code>Then</code> checks</li>
+      <li><code>And</code> continues the line before</li>
+    </ul>
+    <p class="code-caption">Each line under a scenario is a step.</p>
+  </div>
+  <pre class="code"><span class="k">Feature:</span> News articles
+  Editors publish news for visitors.
+
+  <span class="k">Scenario:</span> Editor publishes an article
+    <span class="k">Given</span> I am logged in as a user with the role <span class="s">"editor"</span>
+    <span class="k">When</span> I visit <span class="s">"/node/add/article"</span>
+    <span class="k">And</span> I fill in <span class="s">"Title"</span> with <span class="s">"Melbourne meetup"</span>
+    <span class="k">And</span> I press <span class="s">"Save"</span>
+    <span class="k">Then</span> I should see the success message <span class="s">"Saved"</span></pre>
+</section>
+
+<!-- 5. Behind every step -->
+<section class="slide code-split code-split-reverse">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Drupal Meetup</span>
+  </div>
+  <div class="code-text">
+    <p class="kicker">New to Behat?</p>
+    <h2>Behind every step is PHP code</h2>
+    <p class="lede">Behat matches each step to a PHP method by its pattern, then runs the method.</p>
+    <p class="code-caption">Behat Steps is that code, already written and tested.</p>
+  </div>
+  <pre class="code"><span class="c"># The step in your feature file</span>
+<span class="k">When</span> I visit <span class="s">"/"</span>
+
+<span class="c">// The step definition Behat runs for it</span>
+#[When(<span class="s">'I visit :path'</span>)]
+<span class="k">public function</span> pathVisit(string $path): void {
+  $this->getSession()->visit($this->locatePath($path));
+}
+
+<span class="c">// :path captures "/", and Mink opens the page</span></pre>
+</section>
+
+<!-- 6. Behat Steps today -->
+<section class="slide">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Drupal Meetup</span>
+  </div>
+  <p class="kicker">Behat Steps today</p>
+  <h2>A library of ready-made steps</h2>
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-number">458</div><p class="stat-label">Steps, each with an example</p><p class="stat-source">pages, forms, APIs, Drupal</p></div>
+    <div class="stat-card"><div class="stat-number">57</div><p class="stat-label">Traits: 28 for any website, 29 for Drupal</p><p class="stat-source">grouped by job</p></div>
+    <div class="stat-card"><div class="stat-number">337</div><p class="stat-label">Public helpers for your own steps</p><p class="stat-source">HELPERS.md</p></div>
+    <div class="stat-card"><div class="stat-number">2018</div><p class="stat-label">Open source since</p><p class="stat-source">on GitHub</p></div>
+  </div>
+</section>
+
+<!-- 7. Divider -->
+<section class="slide dark section-divider">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Drupal Meetup</span>
+  </div>
+  <p class="kicker">Behat Steps 4.0.0</p>
+  <h1>What's new</h1>
+</section>
+
+<!-- 8. Drupal 12 and Behat 4 -->
+<section class="slide">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Drupal Meetup</span>
+  </div>
+  <p class="kicker">Drupal 12 ready</p>
+  <h2>Ready for Drupal 12 and Behat 4</h2>
+  <div class="tool-grid">
+    <div class="tool-card"><h3>Drupal 11 and 12</h3><p>Tested on both, with the contrib modules a real site uses.</p></div>
+    <div class="tool-card"><h3>Behat 3.33+ and Behat 4</h3><p>Move to Behat 4 at your own pace, ahead of Drupal 12.</p></div>
+    <div class="tool-card"><h3>PHP 8.3 to 8.5</h3><p>Drupal 12 runs on PHP 8.5 and Symfony 8.</p></div>
+  </div>
+  <p>Drupal 12 needs Symfony 8, and Behat 4 is the Behat release that accepts it.</p>
+</section>
+
+<!-- 9. 3 packages become 1 -->
+<section class="slide code-split">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Drupal Meetup</span>
+  </div>
+  <div class="code-text">
+    <p class="kicker">1 package</p>
+    <h2>Drupal Extension and Drupal Driver, absorbed</h2>
+    <p class="lede">The steps, the Behat extension and the backends that reach Drupal now live in 1 package.</p>
+    <p class="code-caption">1 install, 1 version, 1 test matrix.</p>
+  </div>
+  <pre class="code"><span class="c">  Behat Steps 3.14              Behat Steps 4.0</span>
+
+  drevops/behat-steps    ──┐
+                           │     <span class="k">drevops/behat-steps</span>
+  drupal/drupal-extension ─┼──►  steps
+                           │     contexts
+  drupal/drupal-driver   ──┘     Behat extension
+                                 backends</pre>
+</section>
+
+<!-- 10. Inside the package -->
+<section class="slide">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Drupal Meetup</span>
+  </div>
+  <p class="kicker">Architecture</p>
+  <h2>Inside the package: 4 layers</h2>
+  <p class="lede">Each layer depends only on the layers below it.</p>
+  <div class="layer-list">
+    <div class="layer-row live"><span class="lr-tag">your project</span><div><span class="lr-title">FeatureContext, with your own steps.</span><div class="lr-desc">Extends 1 of the 3 shipped contexts.</div></div></div>
+    <div class="layer-row"><span class="lr-tag">contexts</span><div><span class="lr-title">WebRawContext → WebContext → DrupalContext.</span><div class="lr-desc">Each adds to the one before, and together they reach every layer below.</div></div></div>
+    <div class="layer-row"><span class="lr-tag">src/Steps</span><div><span class="lr-title">What a scenario can say.</span><div class="lr-desc">57 step traits, and the 13 helper traits behind them.</div></div></div>
+    <div class="layer-row"><span class="lr-tag">src/Extension</span><div><span class="lr-title">Plugs the library into Behat and Mink.</span><div class="lr-desc">Reads your <code>behat.php</code> and sets each scenario's backend order.</div></div></div>
+    <div class="layer-row"><span class="lr-tag">src/Backend</span><div><span class="lr-title">Reaches the site: drupal, drush, blackbox.</span><div class="lr-desc">Uses no Behat or Mink code.</div></div></div>
+    <div class="layer-row live"><span class="lr-tag">your site</span><div><span class="lr-title">The website under test.</span></div></div>
+  </div>
+</section>
+
+<!-- 11. Why layers -->
+<section class="slide">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Drupal Meetup</span>
+  </div>
+  <p class="kicker">Architecture</p>
+  <h2>Why it's built in layers</h2>
+  <div class="tool-grid">
+    <div class="tool-card"><h3>Steps reach the site through a capability</h3><p>So 1 step runs in-process, over Drush or on a backend of your own.</p></div>
+    <div class="tool-card"><h3>Backends know only the site</h3><p>They use no Behat or Mink code, so they work outside a test run too.</p></div>
+    <div class="tool-card"><h3>Web steps sit apart from Drupal steps</h3><p>A site that isn't Drupal extends <code>WebContext</code> and gets only the steps it can use.</p></div>
+  </div>
+  <p class="punchline">A linter fails any code that depends on a layer above it.</p>
+</section>
+
+<!-- 12. What a capability is -->
+<section class="slide code-split">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Drupal Meetup</span>
+  </div>
+  <div class="code-text">
+    <p class="kicker">Architecture</p>
+    <h2>A capability is 1 job, written as an interface</h2>
+    <p class="lede">Clearing caches, creating content, running cron. A backend provides a job by implementing its interface.</p>
+    <p class="code-caption">35 capabilities: 11 any backend may provide, 24 only a Drupal backend.</p>
+  </div>
+  <pre class="code"><span class="c">// The job</span>
+<span class="k">interface</span> CacheCapabilityInterface {
+  <span class="k">public function</span> cacheClear(): void;
+  <span class="k">public function</span> cacheClearBin(string $bin): void;
+  <span class="c">// and 3 more</span>
+}
+
+<span class="c">// The step asks for the job</span>
+#[Given(<span class="s">'the cache has been cleared'</span>)]
+<span class="k">public function</span> cacheClearAll(): void {
+  $this->backendFor(CacheCapabilityInterface::class)
+    ->cacheClear();
+}</pre>
+</section>
+
+<!-- 13. Backends picked by capability -->
+<section class="slide">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Drupal Meetup</span>
+  </div>
+  <p class="kicker">Architecture</p>
+  <h2>Backends picked by capability</h2>
+  <p class="lede">A step asks for the job it needs done. The first backend in your list that can do it, runs it.</p>
+  <div class="layer-list">
+    <div class="layer-row"><span class="lr-tag">drupal</span><div><span class="lr-title">Bootstraps Drupal inside Behat.</span><div class="lr-desc">Provides 34 of the 35 capabilities.</div></div></div>
+    <div class="layer-row"><span class="lr-tag">drush</span><div><span class="lr-title">Runs Drush commands against the site.</span><div class="lr-desc">Provides 14, from caches and cron to users.</div></div></div>
+    <div class="layer-row live"><span class="lr-tag">blackbox</span><div><span class="lr-title">A site you can only browse.</span><div class="lr-desc">Page steps only.</div></div></div>
+  </div>
+</section>
+
+<!-- 14. Same step, any backend -->
+<section class="slide code-split">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Drupal Meetup</span>
+  </div>
+  <div class="code-text">
+    <p class="kicker">Architecture</p>
+    <h2>Same step, any backend</h2>
+    <p class="lede"><code>@backend:drush</code> moves Drush to the front for 1 scenario. The steps stay the same.</p>
+    <p class="code-caption">A backend starts only when a step first needs it, and your own backend serves the shipped steps.</p>
+  </div>
+  <pre class="code"><span class="c">// behat.php: the order to try</span>
+<span class="s">'backends'</span> => [<span class="s">'drupal'</span>, <span class="s">'drush'</span>, <span class="s">'blackbox'</span>],
+
+<span class="c"># features/cron.feature</span>
+<span class="k">@backend:drush</span>
+<span class="k">Scenario:</span> The home page loads after cron
+  <span class="k">Given</span> the cache has been cleared
+  <span class="k">When</span> cron runs
+  <span class="k">And</span> I visit <span class="s">"/"</span>
+  <span class="k">Then</span> the response status code should be 200</pre>
+</section>
+
+<!-- 15. Why capabilities -->
+<section class="slide">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Drupal Meetup</span>
+  </div>
+  <p class="kicker">Architecture</p>
+  <h2>Why a step asks for a capability</h2>
+  <p class="lede">Drupal Extension picked 1 driver for a whole scenario, with the <code>@api</code> tag. In 4.0, each step finds a backend for its own job.</p>
+  <ul class="lead">
+    <li>A job the first backend can't do goes to the next one in your list</li>
+    <li>Your own backend serves every shipped step whose capabilities it implements</li>
+    <li>When no backend can do a job, the error names the capability and the order searched</li>
+  </ul>
+  <p class="punchline">Your scenarios describe the site. Your <code>behat.php</code> decides how to reach it.</p>
+</section>
+
+<!-- 16. Consistent language -->
+<section class="slide">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Drupal Meetup</span>
+  </div>
+  <p class="kicker">Consistent language</p>
+  <h2>Every step reads the same way</h2>
+  <p class="lede">All 458 steps follow the same 19 wording rules.</p>
+  <ul class="lead">
+    <li>A person's step starts with I: <code>When I press the button "Save"</code></li>
+    <li>A step the site does starts with its subject: <code>When cron runs</code></li>
+    <li>A value that picks 1 thing follows its noun: <code>in the region "header"</code></li>
+  </ul>
+  <p class="punchline">A linter checks 13 of the rules in CI, so every new step follows them too.</p>
+</section>
+
+<!-- 17. Before / after -->
+<section class="slide">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Drupal Meetup</span>
+  </div>
+  <p class="kicker">Consistent language</p>
+  <h2>The same steps, reworded</h2>
+  <div class="two-col">
+    <div>
+      <p class="col-label">Drupal Extension and Behat Steps 3</p>
+      <pre class="code">I am logged in as a user
+  with the <span class="s">"editor"</span> role
+
+I should see <span class="s">"Welcome"</span>
+  in the <span class="s">"header"</span> region
+
+Given I run cron</pre>
+    </div>
+    <div>
+      <p class="col-label good">Behat Steps 4</p>
+      <pre class="code">I am logged in as a user
+  with the role <span class="s">"editor"</span>
+
+I should see the text <span class="s">"Welcome"</span>
+  in the region <span class="s">"header"</span>
+
+When cron runs</pre>
+    </div>
+  </div>
+  <p class="quiet">Many steps keep their text, including Mink's own, such as <code>I fill in</code> and <code>I press</code>.</p>
+</section>
+
+<!-- 18. Your own steps on the helpers -->
+<section class="slide code-split">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Drupal Meetup</span>
+  </div>
+  <div class="code-text">
+    <p class="kicker">Your own steps</p>
+    <h2>1 context, a helper behind every step</h2>
+    <p class="lede">Extend <code>DrupalContext</code> and every step is there. Your steps call the same 337 helpers.</p>
+    <p class="code-caption">Every public helper is listed in <code>HELPERS.md</code>, which ships with the package.</p>
+  </div>
+  <pre class="code"><span class="k">use</span> Behat\Step\Given;
+<span class="k">use</span> DrevOps\BehatSteps\DrupalContext;
+
+<span class="k">class</span> FeatureContext <span class="k">extends</span> DrupalContext {
+
+  #[Given(<span class="s">'a draft news article exists'</span>)]
+  <span class="k">public function</span> newsDraftExists(): void {
+    $this->contentCreate(<span class="s">'article'</span>, [
+      <span class="s">'title'</span> => <span class="s">'Melbourne meetup'</span>,
+      <span class="s">'status'</span> => 0,
+    ]);
+  }
+
+}</pre>
+</section>
+
+<!-- 19. The create-behat-step skill -->
+<section class="slide code-split">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Drupal Meetup</span>
+  </div>
+  <div class="code-text">
+    <p class="kicker">AI coding agents</p>
+    <h2>A skill that writes your own steps</h2>
+    <p class="lede">Describe a step in plain English, and your agent writes it on the public helpers.</p>
+    <ul class="lead">
+      <li>Checks that no registered step does the job already</li>
+      <li>Adds the step to a trait of yours, with a scenario</li>
+      <li>Verifies with your linters, a dry run and a real run</li>
+    </ul>
+  </div>
+  <pre class="code"><span class="c"># Ships in the package. Link it for Claude Code:</span>
+mkdir -p .claude/skills
+ln -s ../../vendor/drevops/behat-steps/skills/create-behat-step \
+  .claude/skills/create-behat-step
+
+<span class="c"># Then describe the step you need:</span>
+<span class="k">/create-behat-step</span> a Then step that checks that
+  the page with a title is authored by a user</pre>
+</section>
+
+<!-- 20. API steps -->
+<section class="slide code-split code-split-reverse">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Drupal Meetup</span>
+  </div>
+  <div class="code-text">
+    <p class="kicker">API testing</p>
+    <h2>API steps get their own session</h2>
+    <p class="lede">REST, JSON and XML steps run apart from the browser's cookies and page.</p>
+    <p class="code-caption">A header can take its value from the last response, so a token flow runs on the shipped steps.</p>
+  </div>
+  <pre class="code"><span class="k">Scenario:</span> Call the API with a token
+  <span class="k">When</span> I send a REST <span class="s">"GET"</span> request to <span class="s">"/api/token"</span>
+  <span class="k">And</span> the REST header <span class="s">"Authorization"</span>
+    has the value from the JSON path <span class="s">"$.access_token"</span>
+    with the prefix <span class="s">"Bearer "</span>
+  <span class="k">And</span> I send a REST <span class="s">"GET"</span> request to <span class="s">"/api/resource"</span>
+  <span class="k">Then</span> the JSON path <span class="s">"$.items"</span> should exist</pre>
+</section>
+
+<!-- 21. Checks -->
+<section class="slide">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Drupal Meetup</span>
+  </div>
+  <p class="kicker">Built-in checks</p>
+  <h2>Problems surface in the scenario that caused them</h2>
+  <div class="tool-grid">
+    <div class="tool-card"><h3>PHP errors</h3><p>A scenario that logs a PHP error fails, read from Drupal's <code>dblog</code>.</p></div>
+    <div class="tool-card"><h3>JavaScript errors</h3><p>A scenario can fail on a JavaScript error in the browser.</p></div>
+    <div class="tool-card"><h3>Accessibility</h3><p><code>the page should pass accessibility checks</code>, with a threshold per scenario.</p></div>
+  </div>
+  <p>After each scenario, the entities its steps created are deleted in reverse creation order.</p>
+</section>
+
+<!-- 22. Tested on every change -->
+<section class="slide">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Drupal Meetup</span>
+  </div>
+  <p class="kicker">Quality</p>
+  <h2>Tested on every change</h2>
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-number">17</div><p class="stat-label">CI jobs: Drupal 11 and 12, PHP 8.3 to 8.5, Behat 3 and 4</p><p class="stat-source">Selenium and headless Chrome</p></div>
+    <div class="stat-card"><div class="stat-number">95%+</div><p class="stat-label">Line coverage, on every file</p><p class="stat-source">unit, kernel and Behat</p></div>
+  </div>
+  <p>Every step has a scenario of its own that tests it.</p>
+</section>
+
+<!-- 23. Why 1 package -->
+<section class="slide dark">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Drupal Meetup</span>
+  </div>
+  <p class="kicker">Why 1 package</p>
+  <h2 class="big">A change is written, tested and released <span class="accent">once</span>.</h2>
+  <p class="lede">Drupal 12 support went in as 1 change, 2 weeks into the 4.x branch.</p>
+  <hr>
+  <p class="punchline">1 package to install. 1 release to get a fix.</p>
+</section>
+
+<!-- 24. Moving to 4.0 -->
+<section class="slide code-split">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Drupal Meetup</span>
+  </div>
+  <div class="code-text">
+    <p class="kicker">Upgrading</p>
+    <h2>Moving to 4.0</h2>
+    <p class="lede"><code>MIGRATION.md</code> maps every renamed step, class, setting and tag.</p>
+    <p class="code-caption">The <code>migrate-behat-steps</code> skill applies it with your AI coding agent, then runs your suite to check.</p>
+  </div>
+  <pre class="code"><span class="c"># Replace the 2 packages with 1</span>
+composer remove --dev drupal/drupal-extension
+composer require --dev drevops/behat-steps:^4
+
+<span class="c"># Then, in your Behat configuration</span>
+<span class="c"># - BehatStepsExtension replaces DrupalExtension</span>
+<span class="c"># - drop @api and @drush from your features</span></pre>
+</section>
+
+<!-- 25. Which version -->
+<section class="slide">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Drupal Meetup</span>
+  </div>
+  <p class="kicker">Upgrading</p>
+  <h2>Which version suits your site?</h2>
+  <div class="two-col">
+    <div class="tool-card">
+      <h3>Drupal 11 or 12</h3>
+      <p>Move to Behat Steps 4.</p>
+    </div>
+    <div class="tool-card">
+      <h3>Drupal 10</h3>
+      <p>Stay on Behat Steps 3 and Drupal Extension 6, and move with your Drupal 11 upgrade.</p>
+    </div>
+  </div>
+  <p>Drupal Extension 6 and Drupal Driver 3 get security fixes until 1 July 2027.</p>
+</section>
+
+<!-- 26. Maintainers wanted -->
+<section class="slide">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Drupal Meetup</span>
+  </div>
+  <p class="kicker">Get involved</p>
+  <h2>Drupal Extension and Drupal Driver need a new maintainer</h2>
+  <p class="lede">Both receive security fixes until 1 July 2027. If you'd like to carry them forward, say so on the issues.</p>
+  <p class="tool-url">github.com/jhedstrom/drupalextension/issues/882<br>github.com/jhedstrom/DrupalDriver/issues/400</p>
+</section>
+
+<!-- 27. Try it -->
+<section class="slide meme-split">
+  <div class="slide-footer" style="z-index:10;">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Drupal Meetup</span>
+  </div>
+  <div class="meme-text">
+    <p class="kicker">Try it</p>
+    <h2>Everything is on the docs site</h2>
+    <p class="lede">Quick start, every step with an example, configuration, architecture and the migration guide.</p>
+    <p class="tool-url">behat-steps.drevops.com</p>
+    <p><code>composer require --dev drevops/behat-steps:^4</code></p>
+  </div>
+  <img class="meme-img" src="behat_steps_qr.png" alt="QR code linking to behat-steps.drevops.com">
+</section>
+
+<!-- 28. Thanks -->
+<section class="slide dark thanks">
+  <h1 class="huge">Thank you</h1>
+  <p class="lede">Alex Skrypnyk</p>
+  <p class="quiet">DrevOps · behat-steps.drevops.com</p>
+  <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+</section>
+
+<div class="slide-number" id="slideNumber"></div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const numberEl = document.getElementById('slideNumber');
+
+  function updateNumber() {
+    const vh = window.innerHeight;
+    const current = Math.round(window.scrollY / vh) + 1;
+    numberEl.textContent = current + ' / ' + slides.length;
+  }
+
+  function goTo(index) {
+    const vh = window.innerHeight;
+    const target = Math.max(0, Math.min(slides.length - 1, index));
+    window.scrollTo({ top: target * vh, behavior: 'smooth' });
+  }
+
+  updateNumber();
+  window.addEventListener('scroll', updateNumber, { passive: true });
+  window.addEventListener('resize', updateNumber);
+
+  document.addEventListener('keydown', (e) => {
+    const vh = window.innerHeight;
+    const current = Math.round(window.scrollY / vh);
+    const advance = ['ArrowDown', 'ArrowRight', 'PageDown', ' '];
+    const retreat = ['ArrowUp', 'ArrowLeft', 'PageUp'];
+
+    if (advance.includes(e.key)) { e.preventDefault(); goTo(current + 1); }
+    else if (retreat.includes(e.key)) { e.preventDefault(); goTo(current - 1); }
+    else if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+    else if (e.key === 'End') { e.preventDefault(); goTo(slides.length - 1); }
+    else if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) { document.documentElement.requestFullscreen?.(); }
+      else { document.exitFullscreen?.(); }
+    }
+  });
+</script>
+
+</body>
+</html>

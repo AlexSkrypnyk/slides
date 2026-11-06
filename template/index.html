@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide deck template</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /*
+     * ============================================================
+     * DrevOps - Reusable Slide Deck Template
+     * ============================================================
+     * A self-contained, brand-styled HTML slideshow. Scroll-snap
+     * navigation, keyboard control, print-to-PDF ready.
+     *
+     * Palette is driven entirely by the :root variables below,
+     * taken from the DrevOps brand style guide. Every component
+     * class references them and never a raw hex, so editing those
+     * ~15 values reskins the whole deck.
+     *
+     * Colour language: TEAL (secondary) is the accent for the
+     * signal you want to land. CORAL (tertiary) is reserved for
+     * the antagonist / warning / "the problem" - use sparingly.
+     * ============================================================
+     */
+    :root {
+      /* Surfaces */
+      --deck-darker: #030D1E;   /* section dividers, title panel   */
+      --deck-dark:   #152235;   /* dark slide background           */
+      --deck-panel:  #2B394D;   /* cards / panels on dark          */
+      --deck-light:  #F4F8FD;   /* light slide background          */
+      --deck-white:  #FFFFFF;
+
+      /* Text */
+      --deck-text:       #152235;  /* text on light   */
+      --deck-muted:      #5B6A80;
+      --deck-soft:       #75849C;
+      --deck-warm:       #EFF6FF;  /* text on dark    */
+      --deck-warm-muted: #ABBCD5;
+
+      /* Accents */
+      --accent:        #1E7582;  /* teal  - accent on LIGHT slides  */
+      --accent-dim:    #045A65;
+      --accent-bright: #96E7F4;  /* cyan  - accent on DARK slides   */
+
+      /* The antagonist - coral, used sparingly */
+      --slop:        #CD5B43;    /* coral - on LIGHT slides         */
+      --slop-bright: #FF9C86;    /* coral - on DARK slides          */
+
+      /* Code */
+      --code-bg: #0E1B2A;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { margin: 0; padding: 0; }
+
+    body {
+      font-family: "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--deck-text);
+      background: var(--deck-light);
+      scroll-snap-type: y mandatory;
+      overflow-y: scroll;
+      height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      letter-spacing: -0.01em;
+    }
+
+    .slide {
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      height: 100vh;
+      max-height: 100vh;
+      padding: 5vh 7vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: var(--deck-light);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Headings use Plus Jakarta Sans; body copy uses Outfit. */
+    h1, h2, h3, .kicker, .byline, .step-badge, .col-label,
+    .workflow-label, .stat-number, .tool-card h3 {
+      font-family: "Plus Jakarta Sans", sans-serif;
+    }
+
+    .slide h1 { font-size: clamp(2.5rem, 5.5vw, 4.75rem); margin-bottom: 1rem; }
+    .slide h2 { font-size: clamp(1.85rem, 3.75vw, 3.25rem); margin-bottom: 1rem; }
+    .slide h2.big { font-size: clamp(2.25rem, 4.5vw, 3.85rem); margin-bottom: 1rem; }
+    .slide p { font-size: clamp(1.05rem, 1.45vw, 1.5rem); line-height: 1.45; margin-bottom: 0.75rem; }
+    .slide .lede { font-size: clamp(1.25rem, 1.9vw, 1.95rem); margin-bottom: 1rem; }
+    .slide .kicker { margin-bottom: 1.25rem; }
+    .slide ul.lead { font-size: clamp(1.05rem, 1.55vw, 1.5rem); }
+    .slide ul.lead li { margin-bottom: 0.4rem; }
+    .slide hr { margin: 0.85rem 0; }
+
+    /* ── Dark slides ── */
+    .slide.dark { background: var(--deck-dark); color: var(--deck-warm); }
+    .slide.dark.section-divider { background: var(--deck-darker); }
+    .slide.dark .kicker { color: var(--accent-bright); }
+    .slide.dark .quiet { color: var(--deck-warm-muted); }
+    .slide.dark h2, .slide.dark h1 { color: var(--accent-bright); }
+    .slide.dark p { color: var(--deck-warm); }
+
+    /* ── Footer chrome (logo lockup) ── */
+    .slide-footer {
+      position: absolute;
+      bottom: 2.2vh;
+      left: 3vw;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      z-index: 5;
+      opacity: 0.92;
+      color: var(--deck-text);
+    }
+    .slide.dark .slide-footer { color: var(--deck-warm); }
+
+    .slide-footer .deck-logo { height: 24px; width: auto; display: block; color: inherit; }
+    .slide-footer .deck-logo svg { height: 100%; width: auto; display: block; }
+
+    .slide-footer .sep { width: 1px; height: 20px; background: currentColor; opacity: 0.3; }
+    .slide-footer .venue {
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; opacity: 0.75;
+    }
+
+    .slide.title .slide-footer,
+    .slide.thanks .slide-footer { display: none; }
+
+    /* ── Kicker / eyebrow ── */
+    .kicker {
+      font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.22em;
+      color: var(--accent); margin: 0 0 2.25rem; font-weight: 800;
+    }
+    .kicker.slop { color: var(--slop); }
+    .slide.dark .kicker.slop { color: var(--slop-bright); }
+
+    h1 {
+      font-size: clamp(3rem, 7vw, 6rem); font-weight: 800; margin: 0 0 1.5rem;
+      line-height: 0.99; letter-spacing: -0.035em; max-width: 22ch;
+    }
+    h2 {
+      font-size: clamp(2.25rem, 4.75vw, 4.25rem); font-weight: 700; margin: 0 0 1.5rem;
+      line-height: 1.03; letter-spacing: -0.03em;
+    }
+    h2.big { font-size: clamp(2.75rem, 5.75vw, 5rem); max-width: 30ch; }
+    h1.huge { font-size: clamp(5rem, 14vw, 12.5rem); max-width: none; letter-spacing: -0.05em; font-weight: 800; }
+
+    p { font-size: clamp(1.2rem, 1.75vw, 1.75rem); line-height: 1.5; margin: 0 0 1rem; max-width: 60ch; }
+
+    .lede {
+      font-size: clamp(1.5rem, 2.4vw, 2.4rem); font-weight: 500; line-height: 1.32;
+      max-width: 42ch; letter-spacing: -0.012em;
+    }
+
+    .quiet { color: var(--deck-muted); }
+    .accent { color: var(--accent); }
+    .slide.dark .accent { color: var(--accent-bright); }
+    .slop-text { color: var(--slop); }
+    .slide.dark .slop-text { color: var(--slop-bright); }
+
+    ul.lead {
+      font-size: clamp(1.2rem, 1.85vw, 1.75rem); line-height: 1.5; margin: 0 0 1rem;
+      padding: 0; list-style: none; max-width: 60ch; font-weight: 500;
+    }
+    ul.lead li { padding-left: 1.75rem; position: relative; margin-bottom: 0.55rem; }
+    ul.lead li::before {
+      content: ""; position: absolute; left: 0; top: 0.62em; width: 0.55rem; height: 0.55rem;
+      background: var(--accent); border-radius: 50%;
+    }
+    .slide.dark ul.lead li::before { background: var(--accent-bright); }
+    ul.lead.slop li::before { background: var(--slop); }
+    .slide.dark ul.lead.slop li::before { background: var(--slop-bright); }
+
+    .byline { font-size: clamp(1.1rem, 1.55vw, 1.4rem); font-weight: 600; letter-spacing: 0; margin-top: 1.75rem; }
+
+    /* ── Title slide (split: dark panel + brand gradient) ── */
+    .slide.title { padding: 0; flex-direction: row; overflow: hidden; }
+    .title-left {
+      flex: 1 1 58%; background: var(--deck-darker); color: var(--deck-warm);
+      padding: 9vh 5.5vw; display: flex; flex-direction: column; justify-content: center; position: relative;
+    }
+    .title-left .deck-logo { height: 30px; width: auto; margin-bottom: 2.75rem; color: var(--deck-warm); align-self: flex-start; }
+    .title-left .deck-logo svg { height: 100%; width: auto; display: block; }
+    .title-left h1 { color: var(--deck-warm); max-width: 16ch; }
+    .title-left h1 .accent { color: var(--accent-bright); }
+    .title-left .lede { color: var(--deck-warm-muted); max-width: 30ch; }
+    .title-left .byline { color: var(--deck-warm); margin-top: 1.75rem; }
+    .title-left .byline small { display: block; font-weight: 500; color: var(--deck-warm-muted); font-size: 0.8em; margin-top: 0.3rem; }
+
+    .title-right {
+      flex: 0 0 42%;
+      background:
+        radial-gradient(circle at 62% 42%, color-mix(in srgb, var(--accent) 55%, transparent) 0%, transparent 46%),
+        linear-gradient(150deg, var(--deck-dark) 0%, var(--accent-dim) 100%);
+      overflow: hidden; position: relative;
+    }
+    /* Concentric "orbit" motif echoing the DrevOps spiral mark. */
+    .title-right::before,
+    .title-right::after {
+      content: ""; position: absolute; top: 42%; left: 62%; transform: translate(-50%, -50%);
+      border-radius: 50%; border: 2px solid color-mix(in srgb, var(--accent-bright) 40%, transparent);
+    }
+    .title-right::before { width: 46vh; height: 46vh; }
+    .title-right::after { width: 30vh; height: 30vh; border-color: color-mix(in srgb, var(--accent-bright) 60%, transparent); }
+    .title-orbit {
+      position: absolute; top: 42%; left: 62%; transform: translate(-50%, -50%);
+      width: 16vh; height: 16vh; border-radius: 50%;
+      background: color-mix(in srgb, var(--accent-bright) 22%, transparent);
+      box-shadow: 0 0 60px color-mix(in srgb, var(--accent-bright) 45%, transparent);
+    }
+
+    /* ── Thanks slide ── */
+    .slide.thanks {
+      align-items: center; justify-content: center; text-align: center;
+      background: var(--deck-darker); color: var(--deck-warm);
+    }
+    .slide.thanks h1.huge { color: var(--accent-bright); margin-bottom: 2.5rem; }
+    .slide.thanks .lede { color: var(--deck-warm); }
+    .slide.thanks .quiet { color: var(--deck-warm-muted); }
+    .slide.thanks .deck-logo { height: 26px; width: auto; margin-top: 3rem; color: var(--deck-warm); opacity: 0.9; }
+    .slide.thanks .deck-logo svg { height: 100%; width: auto; }
+
+    /* ── Code blocks ── */
+    pre.code {
+      font-family: "Fira Code", ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: clamp(0.82rem, 1.1vw, 1.05rem); line-height: 1.6;
+      background: var(--code-bg); color: var(--deck-warm);
+      padding: 1.25rem 1.75rem; border-left: 5px solid var(--accent-bright);
+      overflow: auto; white-space: pre; margin: 0.75rem 0; max-width: min(95ch, 100%);
+      tab-size: 2; box-shadow: 0 2px 12px rgba(3, 13, 30, 0.14); border-radius: 0 6px 6px 0;
+    }
+    pre.code .c { color: var(--deck-soft); font-style: italic; }
+    pre.code .k { color: var(--accent-bright); }
+    pre.code .s { color: var(--slop-bright); }
+    .code-caption {
+      color: var(--deck-muted); font-size: clamp(1.15rem, 1.6vw, 1.5rem); font-weight: 500;
+      margin: 0; max-width: 42ch; line-height: 1.35;
+    }
+    .slide.dark .code-caption { color: var(--deck-warm-muted); }
+    .slide.dark pre.code { background: #0A1524; }
+
+    code {
+      font-family: "Fira Code", ui-monospace, monospace; font-size: 0.9em;
+      background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent);
+      padding: 0.1em 0.4em; border-radius: 3px; font-weight: 500;
+    }
+    .slide.dark code { background: color-mix(in srgb, var(--accent-bright) 16%, transparent); color: var(--accent-bright); }
+
+    hr { border: 0; border-top: 3px solid var(--accent); margin: 1.5rem 0; max-width: 5rem; }
+    .slide.dark hr { border-top-color: var(--accent-bright); }
+
+    a {
+      color: inherit; text-decoration: underline; text-underline-offset: 4px;
+      text-decoration-thickness: 2px; text-decoration-color: var(--accent);
+    }
+    .slide.dark a { text-decoration-color: var(--accent-bright); }
+
+    .slide-number {
+      position: fixed; bottom: 1rem; right: 1.5rem; font-family: "Fira Code", monospace;
+      font-size: 0.7rem; color: var(--deck-muted); background: color-mix(in srgb, var(--deck-light) 90%, transparent);
+      padding: 0.25rem 0.55rem; user-select: none; pointer-events: none; z-index: 100;
+      font-weight: 500; letter-spacing: 0.06em;
+    }
+
+    @media print {
+      body { scroll-snap-type: none; overflow: visible; height: auto; }
+      .slide { page-break-after: always; min-height: 100vh; height: auto; overflow: visible; }
+      /* Portrait paper: stack the horizontal split layouts so nothing is cut off.
+         !important is needed to beat the more specific .code-split-reverse / .meme-split-reverse rules. */
+      .slide.code-split, .slide.meme-split { flex-direction: column !important; align-items: flex-start; gap: 1.5rem; }
+      .slide.code-split .code-text, .slide.code-split .slide-text, .slide.code-split pre.code, .slide.meme-split .meme-text { flex: none !important; max-width: 100% !important; width: 100%; }
+      .slide.meme-split .meme-img, .slide.meme-split .img-placeholder { flex: none; max-width: 100%; max-height: 40vh; width: auto; margin: 1rem 0; }
+      pre.code, pre.terminal, pre.diff { white-space: pre-wrap; overflow: visible; }
+      .slide-number { display: none; }
+    }
+
+    /* ── Punchline (underlined emphasis line) ── */
+    .punchline {
+      font-size: clamp(1.65rem, 2.5vw, 2.2rem); font-weight: 600; line-height: 1.3;
+      letter-spacing: -0.015em; color: var(--deck-text); margin-top: 1.25rem;
+      text-decoration: underline; text-decoration-color: var(--accent);
+      text-decoration-thickness: 4px; text-underline-offset: 0.35em; text-decoration-skip-ink: none;
+    }
+    .slide.dark .punchline { color: var(--deck-warm); text-decoration-color: var(--accent-bright); }
+    .punchline.slop { text-decoration-color: var(--slop); }
+    .slide.dark .punchline.slop { text-decoration-color: var(--slop-bright); }
+
+    /* ── Step badge ── */
+    .step-badge {
+      display: inline-block; background: var(--accent); color: #fff; font-size: 0.75rem;
+      font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.2rem 0.65rem;
+      border-radius: 3px; margin-bottom: 1.2rem; font-family: "Fira Code", monospace;
+    }
+    .slide.dark .step-badge { background: var(--accent-bright); color: var(--deck-darker); }
+
+    /* ── Two-column ── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 3vw; align-items: start; max-width: 120ch; }
+    .two-col .col-label {
+      font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.18em;
+      color: var(--deck-soft); margin-bottom: 0.6rem;
+    }
+    .two-col .col-label.slop { color: var(--slop); }
+    .two-col .col-label.good { color: var(--accent); }
+    .two-col > div { min-width: 0; }
+    .two-col pre.code { max-width: 100%; }
+
+    /* ── Terminal / diff ── */
+    pre.terminal, pre.diff {
+      font-family: "Fira Code", ui-monospace, monospace; font-size: clamp(0.78rem, 1vw, 0.95rem);
+      line-height: 1.55; background: #0A1524; color: #c9d1d9; padding: 1rem 1.4rem;
+      border-radius: 6px; margin: 0.75rem 0; max-width: min(80ch, 100%); overflow: auto; white-space: pre;
+    }
+    pre.terminal .ok { color: #63DA7E; }
+    pre.terminal .warn { color: #FFCF3D; }
+    pre.terminal .err { color: #FF9C86; }
+    pre.terminal .dim { color: #4D4D4D; }
+    pre.terminal .prompt { color: var(--accent-bright); }
+    pre.diff .add { color: #63DA7E; }
+    pre.diff .del { color: #FF9C86; }
+    pre.diff .meta { color: var(--accent-bright); }
+
+    /* ── PR mockup ── */
+    .pr-mockup {
+      background: #fff; border: 1px solid #d0d7de; border-radius: 8px; max-width: 58ch;
+      overflow: hidden; box-shadow: 0 2px 8px rgba(3, 13, 30, 0.1); font-size: clamp(0.85rem, 1.1vw, 1rem);
+    }
+    .pr-header { background: #f6f8fa; border-bottom: 1px solid #d0d7de; padding: 0.65rem 1rem; font-size: 0.8rem; color: #57606a; font-family: "Fira Code", monospace; }
+    .pr-title { font-weight: 700; font-size: clamp(1rem, 1.3vw, 1.1rem); color: #0969da; padding: 0.7rem 1rem 0.3rem; }
+    .pr-body { padding: 0.5rem 1rem 0.85rem; color: #24292f; line-height: 1.5; font-size: clamp(0.82rem, 1vw, 0.95rem); font-family: "Fira Code", monospace; white-space: pre-wrap; }
+    .pr-comment { border-top: 1px solid #d0d7de; padding: 0.6rem 1rem; background: #fff8c5; font-size: clamp(0.82rem, 1vw, 0.95rem); color: #24292f; }
+    .pr-comment strong { color: #953800; }
+
+    /* ── Image split ── */
+    .slide.meme-split { flex-direction: row; align-items: center; gap: 4vw; padding: 8vh 6vw; }
+    .slide.meme-split .meme-text { flex: 1 1 46%; max-width: 46%; min-width: 0; }
+    .meme-img { max-width: min(700px, 60vw); max-height: 62vh; width: auto; height: auto; border-radius: 8px; box-shadow: 0 6px 26px rgba(3, 13, 30, 0.22); margin: 1rem 0; display: block; }
+    .slide.meme-split .meme-img { flex: 0 0 48%; max-width: 48%; max-height: 78vh; width: auto; margin: 0; }
+    .slide.meme-split-reverse { flex-direction: row-reverse; }
+    .img-placeholder {
+      flex: 0 0 48%; max-width: 48%; aspect-ratio: 4 / 3; border-radius: 8px;
+      border: 2px dashed color-mix(in srgb, var(--accent) 45%, transparent);
+      background: color-mix(in srgb, var(--accent) 6%, transparent);
+      display: flex; align-items: center; justify-content: center; text-align: center;
+      color: var(--deck-soft); font-family: "Fira Code", monospace; font-size: 0.9rem; padding: 2rem;
+    }
+
+    /* ── Code split ── */
+    .slide.code-split { flex-direction: row; align-items: center; gap: 3vw; padding: 8vh 6vw; }
+    .slide.code-split .code-text, .slide.code-split .slide-text { flex: 1 1 40%; max-width: 40%; min-width: 0; }
+    .slide.code-split pre.code { flex: 0 0 56%; max-width: 56%; max-height: 78vh; margin: 0; min-width: 0; }
+    .slide.code-split.code-split-reverse { flex-direction: row-reverse; }
+    @media (max-width: 900px) {
+      .slide.code-split, .slide.meme-split { flex-direction: column; }
+      .slide.code-split .code-text, .slide.code-split .slide-text, .slide.code-split pre.code,
+      .slide.meme-split .meme-text, .slide.meme-split .meme-img, .img-placeholder { flex: none; max-width: 100%; }
+    }
+
+    /* ── Timeline ── */
+    .timeline { position: relative; width: 100%; padding: 0 0 1rem; margin-top: 1.5rem; min-height: 11rem; display: grid; grid-template-columns: repeat(6, 1fr); gap: 0; }
+    .timeline-track { position: absolute; top: 4.375rem; left: 8.333%; right: 8.333%; height: 5px; background: linear-gradient(90deg, var(--accent) 0%, var(--accent-bright) 100%); border-radius: 3px; z-index: 1; transform: translateY(-50%); }
+    .timeline-point { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; position: relative; z-index: 2; padding: 5.5rem 0.5rem 0; }
+    .timeline-point::before { content: ""; width: 1.75rem; height: 1.75rem; background: var(--deck-light); border-radius: 50%; border: 4px solid var(--accent); box-shadow: 0 0 12px rgba(3, 13, 30, 0.16); position: absolute; top: 4.375rem; left: 50%; transform: translate(-50%, -50%); z-index: 2; }
+    .timeline-point:last-child::before { background: var(--accent-bright); border-color: var(--accent); width: 2rem; height: 2rem; box-shadow: 0 0 16px color-mix(in srgb, var(--accent-bright) 50%, transparent); }
+    .timeline-point .year { font-family: "Plus Jakarta Sans", sans-serif; font-weight: 800; font-size: clamp(1.25rem, 2vw, 1.85rem); color: var(--accent); letter-spacing: -0.02em; margin-top: 0.75rem; line-height: 1; }
+    .timeline-point .label { font-size: clamp(0.82rem, 1.05vw, 1rem); text-align: center; line-height: 1.3; color: var(--deck-muted); font-weight: 500; }
+    .slide.dark .timeline-point::before { background: var(--deck-dark); border-color: var(--accent-bright); }
+    .slide.dark .timeline-point .year { color: var(--accent-bright); }
+    .slide.dark .timeline-point .label { color: var(--deck-warm); }
+
+    /* ── Comparison bars ── */
+    .comparison { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.5rem 0; max-width: 42rem; }
+    .comparison-row { display: grid; grid-template-columns: 10rem 1fr 4rem; align-items: center; gap: 1rem; font-size: clamp(1rem, 1.5vw, 1.3rem); }
+    .comparison-row .name { font-weight: 700; }
+    .comparison-row .bar { position: relative; height: 1.75rem; background: color-mix(in srgb, var(--accent) 12%, transparent); border-radius: 3px; overflow: hidden; }
+    .comparison-row .bar .fill { display: block; width: var(--pct); height: 100%; background: var(--accent); }
+    .comparison-row .pct { font-weight: 700; font-family: "Fira Code", monospace; }
+    .slide.dark .comparison-row .bar { background: color-mix(in srgb, var(--accent-bright) 14%, transparent); }
+    .slide.dark .comparison-row .bar .fill { background: var(--accent-bright); }
+
+    /* ── Section divider ── */
+    .slide.section-divider { justify-content: center; align-items: flex-start; }
+    .slide.section-divider .kicker { margin-bottom: 1.5rem; }
+    .slide.section-divider h1 { font-size: clamp(4rem, 10vw, 8rem); line-height: 0.95; letter-spacing: -0.035em; max-width: 18ch; }
+    .slide.section-divider.slop-divider h1 { color: var(--slop-bright); }
+
+    /* ── Tool grid ── */
+    .tool-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; margin: 1.5rem 0; max-width: 82rem; width: 100%; }
+    .tool-card { padding: 1.25rem 1.4rem; background: color-mix(in srgb, var(--accent) 6%, transparent); border-left: 4px solid var(--accent); border-radius: 4px; }
+    .tool-card h3 { font-size: clamp(0.98rem, 1.35vw, 1.22rem); font-weight: 800; color: var(--accent); margin: 0 0 0.5rem; letter-spacing: -0.01em; }
+    .tool-card h3 code, .tool-card h3 .mono { font-family: "Fira Code", monospace; font-size: 0.92em; background: none; color: inherit; padding: 0; }
+    .tool-card p { font-size: clamp(1rem, 1.3vw, 1.2rem); color: var(--deck-muted); line-height: 1.4; margin: 0; }
+    .tool-card .url { margin: 0.55rem 0 0; font-family: "Fira Code", monospace; font-size: clamp(0.78rem, 1vw, 0.92rem); color: var(--accent); opacity: 0.85; }
+    .slide.dark .tool-card { background: color-mix(in srgb, var(--accent-bright) 8%, transparent); border-left-color: var(--accent-bright); }
+    .slide.dark .tool-card h3 { color: var(--accent-bright); }
+    .slide.dark .tool-card p { color: var(--deck-warm); }
+    .slide.dark .tool-card .url { color: var(--accent-bright); }
+    /* Coral variant - for slop / problem cards */
+    .tool-card.slop-card { background: color-mix(in srgb, var(--slop) 8%, transparent); border-left-color: var(--slop); }
+    .tool-card.slop-card h3 { color: var(--slop); }
+    .slide.dark .tool-card.slop-card { background: color-mix(in srgb, var(--slop-bright) 10%, transparent); border-left-color: var(--slop-bright); }
+    .slide.dark .tool-card.slop-card h3 { color: var(--slop-bright); }
+    @media (max-width: 1100px) { .tool-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .tool-url { margin-top: 2rem; font-family: "Fira Code", monospace; font-size: clamp(1.3rem, 2.4vw, 2.2rem); color: var(--accent); word-break: break-all; letter-spacing: -0.01em; }
+    .slide.dark .tool-url { color: var(--accent-bright); }
+
+    /* ── Workflow lists ── */
+    .workflow-list-wide { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.6rem; margin: 2rem 0 1rem; max-width: 100%; counter-reset: workflow; list-style: none; padding: 0; }
+    .workflow-list-wide li {
+      counter-increment: workflow; padding: 1.1rem 0.65rem 1rem; text-align: center;
+      background: color-mix(in srgb, var(--accent) 7%, transparent); border-left: 4px solid var(--accent);
+      border-radius: 4px; color: var(--deck-text); font-weight: 700; font-size: clamp(0.95rem, 1.3vw, 1.2rem); position: relative;
+    }
+    .workflow-list-wide li::before {
+      content: counter(workflow, decimal-leading-zero); display: block; font-family: "Fira Code", monospace;
+      font-size: 0.75rem; font-weight: 700; color: var(--accent); letter-spacing: 0.08em; margin-bottom: 0.4rem;
+    }
+    .slide.dark .workflow-list-wide li { background: color-mix(in srgb, var(--accent-bright) 8%, transparent); border-left-color: var(--accent-bright); color: var(--deck-warm); }
+    .slide.dark .workflow-list-wide li::before { color: var(--accent-bright); }
+    @media (max-width: 1100px) { .workflow-list-wide { grid-template-columns: repeat(4, 1fr); } }
+    @media (max-width: 700px) { .workflow-list-wide { grid-template-columns: repeat(2, 1fr); } }
+
+    ol.workflow-steps { counter-reset: step; padding-left: 0; margin-top: 0.75rem; list-style: none; }
+    ol.workflow-steps li { counter-increment: step; padding-left: 2.6rem; margin-bottom: 0.45rem; font-size: clamp(1rem, 1.4vw, 1.3rem); line-height: 1.35; position: relative; }
+    ol.workflow-steps li::before { content: counter(step, decimal-leading-zero); position: absolute; left: 0; top: 0.15em; font-family: "Fira Code", monospace; font-size: 0.85rem; font-weight: 700; color: var(--accent); letter-spacing: 0.05em; }
+    .slide.dark ol.workflow-steps li::before { color: var(--accent-bright); }
+
+    /* ── Stat grid ── */
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 1.5rem 0; max-width: 60rem; }
+    .stat-card { background: color-mix(in srgb, var(--accent) 8%, transparent); border-left: 5px solid var(--accent); padding: 1.3rem 1.6rem; border-radius: 4px; }
+    .slide.dark .stat-card { background: color-mix(in srgb, var(--accent-bright) 8%, transparent); border-left-color: var(--accent-bright); }
+    .stat-number { font-size: clamp(2.5rem, 4.5vw, 4.25rem); font-weight: 800; line-height: 1; letter-spacing: -0.04em; color: var(--accent); margin-bottom: 0.4rem; }
+    .slide.dark .stat-number { color: var(--accent-bright); }
+    .stat-label { font-size: clamp(1rem, 1.25vw, 1.15rem); font-weight: 600; color: var(--deck-text); margin: 0 0 0.4rem; line-height: 1.3; }
+    .slide.dark .stat-label { color: var(--deck-warm); }
+    .stat-source { font-size: clamp(0.78rem, 0.95vw, 0.9rem); color: var(--deck-soft); font-family: "Fira Code", monospace; margin: 0; }
+    @media (max-width: 900px) { .stat-grid, .two-col { grid-template-columns: 1fr; } }
+
+    /* ── Loop diagram ── */
+    .loop-diagram { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; align-items: center; margin: 2rem 0 1rem; max-width: 70rem; width: 100%; }
+    .loop-node { background: var(--deck-darker); color: var(--accent-bright); border: 2px solid var(--accent-bright); border-radius: 4px; padding: 1.1rem 0.75rem; text-align: center; font-weight: 700; font-size: clamp(0.95rem, 1.3vw, 1.2rem); letter-spacing: -0.01em; }
+    .loop-arrow { text-align: center; color: var(--accent); font-size: clamp(1.5rem, 2.2vw, 2rem); font-weight: 900; }
+    @media (max-width: 900px) { .loop-diagram { grid-template-columns: 1fr; } .loop-arrow { display: none; } }
+
+    /* ── Tiered guardrails: a variable layer resting on a deterministic foundation ── */
+    .tier-stack { display: flex; flex-direction: column; gap: 0.9rem; width: 100%; max-width: 74rem; margin: 1.5rem 0; }
+    .tier { border-radius: 6px; padding: 1.15rem 1.5rem; }
+    .tier .tier-tag { font-family: "Fira Code", monospace; font-size: clamp(0.72rem, 0.95vw, 0.85rem); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin: 0 0 0.35rem; }
+    .tier .tier-title { font-family: "Plus Jakarta Sans", sans-serif; font-weight: 700; font-size: clamp(1.15rem, 1.7vw, 1.6rem); color: var(--deck-text); margin: 0 0 0.3rem; letter-spacing: -0.01em; }
+    .tier .tier-desc { font-size: clamp(1rem, 1.3vw, 1.2rem); color: var(--deck-muted); margin: 0; line-height: 1.4; max-width: none; }
+    .tier.variable { background: color-mix(in srgb, var(--accent) 5%, transparent); border: 2px dashed color-mix(in srgb, var(--accent) 55%, transparent); }
+    .tier.foundation { background: color-mix(in srgb, var(--accent) 11%, transparent); border-left: 6px solid var(--accent); }
+    .slide.dark .tier .tier-tag { color: var(--accent-bright); }
+    .slide.dark .tier .tier-title { color: var(--deck-warm); }
+    .slide.dark .tier .tier-desc { color: var(--deck-warm-muted); }
+    .slide.dark .tier.variable { background: color-mix(in srgb, var(--accent-bright) 7%, transparent); border-color: color-mix(in srgb, var(--accent-bright) 45%, transparent); }
+    .slide.dark .tier.foundation { background: color-mix(in srgb, var(--accent-bright) 12%, transparent); border-left-color: var(--accent-bright); }
+
+    /* ── Layered checklist (e.g. testing layers); add .live for a model/opt-in row ── */
+    .layer-list { display: flex; flex-direction: column; gap: 0.55rem; width: 100%; max-width: 84rem; margin: 1.25rem 0; }
+    .layer-row { display: grid; grid-template-columns: minmax(8.5rem, auto) 1fr; gap: 1.5rem; align-items: start; padding: 0.65rem 1.1rem; background: color-mix(in srgb, var(--accent) 5%, transparent); border-left: 4px solid var(--accent); border-radius: 4px; }
+    .layer-row .lr-tag { font-family: "Fira Code", monospace; font-size: clamp(0.78rem, 1vw, 0.95rem); font-weight: 700; color: var(--accent); white-space: nowrap; }
+    .layer-row .lr-title { font-family: "Plus Jakarta Sans", sans-serif; font-weight: 700; font-size: clamp(1rem, 1.3vw, 1.2rem); }
+    .layer-row .lr-desc { color: var(--deck-muted); font-size: clamp(0.9rem, 1.15vw, 1.08rem); line-height: 1.35; margin-top: 0.1rem; }
+    .layer-row.live { border-left-style: dashed; border-left-color: color-mix(in srgb, var(--accent) 60%, transparent); background: transparent; }
+    .layer-row.live .lr-tag { color: var(--deck-soft); }
+    .slide.dark .layer-row { background: color-mix(in srgb, var(--accent-bright) 7%, transparent); border-left-color: var(--accent-bright); }
+    .slide.dark .layer-row .lr-tag { color: var(--accent-bright); }
+    .slide.dark .layer-row .lr-desc { color: var(--deck-warm-muted); }
+    .slide.dark .layer-row.live { background: transparent; border-left-color: color-mix(in srgb, var(--accent-bright) 55%, transparent); }
+    .slide.dark .layer-row.live .lr-tag { color: var(--deck-warm-muted); }
+    @media (max-width: 900px) { .layer-row { grid-template-columns: 1fr; gap: 0.2rem; } }
+  </style>
+</head>
+<body>
+
+<!--
+  ══════════════════════════════════════════════════════════════
+  DrevOps logo - defined ONCE as a <symbol>, recoloured via
+  currentColor. Reference it anywhere with:
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+  ══════════════════════════════════════════════════════════════
+-->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="drevops-logo" viewBox="0 0 5267 1247">
+    <path fill="currentColor" d="M1011.19 597.403C988.318 508.771 942.368 429.419 880.123 366.132L514.068 0.0761719L146.414 367.726C-10.518 528.674 -41.1878 767.448 56.2944 958.829C141.151 1125.42 314.272 1239.52 514.051 1239.52C713.829 1239.52 886.957 1125.41 971.82 958.812C984.806 933.317 1060.17 787.162 1011.19 597.4L1011.19 597.403ZM614.259 200.469L664.358 250.568L338.975 575.951C335.175 579.75 331.62 583.797 328.4 588.1C276.857 656.973 282.457 730.538 282.511 732.616C285.752 857.493 388.011 957.732 513.677 957.732C639.343 957.732 742.013 857.085 744.849 731.844C744.972 726.467 749.67 636.471 680.886 567.69L564.163 450.967L564.554 450.57L614.266 400.868C614.266 400.868 732.514 517.708 741.842 528.444C841.247 642.89 813.129 771.868 807.793 794.785C776.712 928.266 656.999 1027.71 514.054 1027.71C371.109 1027.71 251.403 928.273 220.322 794.806C182.536 632.548 289.442 524.837 291.475 522.584C291.561 522.491 614.255 200.472 614.259 200.465V200.469ZM620.092 607.084C629.878 615.807 673.904 656.504 673.613 727.163C673.25 815.36 599.339 887.768 511.153 886.404C423.985 885.052 353.737 813.974 353.737 726.488C353.737 688.137 367.231 652.944 389.739 625.391C396.56 617.035 514.071 501.059 514.071 501.059L620.095 607.084H620.092ZM945.139 831.157C945.063 831.473 919.523 906.299 919.455 906.447C850.359 1061.57 694.832 1169.7 514.051 1169.7C333.269 1169.7 177.76 1061.58 108.663 906.46C108.612 906.333 108.55 906.213 108.499 906.086C67.9019 807.548 70.8063 743.767 70.7686 742.937C70.7686 742.937 56.0132 576.757 179.354 434.977C185.815 427.55 192.518 420.346 199.459 413.367L514.068 100.271L564.167 150.37L237.175 477.361C190.324 529.466 157.987 594.866 146.493 667.202C146.425 667.607 146.359 668.018 146.298 668.423C111.444 903.645 292.881 1098.31 514.054 1098.31C675.592 1098.31 813.095 995.407 864.586 851.571C884.471 796.02 890.801 726.2 881.807 668.403C870.457 595.452 837.914 529.507 790.668 477.07L664.358 350.759L714.457 300.66C714.457 300.66 834.424 418.525 848.634 434.837C959.256 561.82 973.045 716.293 945.135 831.151L945.139 831.157Z"/>
+    <path fill="currentColor" d="M1403.5 264.233H1635.17C1809.67 264.233 2001.91 380.561 2001.91 613.222C2001.91 845.882 1809.67 962.211 1635.17 962.211H1403.5V264.233ZM1474.48 897.147H1612.5C1825.44 897.147 1925.02 757.158 1925.02 613.222C1925.02 469.286 1825.44 329.3 1612.5 329.3H1474.48V897.147Z"/>
+    <path fill="currentColor" d="M2138.94 644.769C2138.94 603.363 2136.97 567.872 2135 500.837H2199.07V586.605H2201.05C2219.78 537.312 2268.09 489.006 2348.92 489.006C2367.65 489.006 2383.43 490.978 2397.23 494.922L2384.41 559.001C2376.53 556.045 2364.7 554.073 2346.95 554.073C2248.36 554.073 2204 639.842 2204 701.949V962.214H2138.94V644.773L2138.94 644.769Z"/>
+    <path fill="currentColor" d="M2498.77 749.271C2506.65 841.942 2576.65 914.893 2668.33 914.893C2737.34 914.893 2790.58 876.446 2816.21 835.039L2866.49 876.446C2812.26 945.456 2744.24 974.044 2668.33 974.044C2531.3 974.044 2429.75 870.53 2429.75 731.525C2429.75 592.52 2531.3 489.006 2662.41 489.006C2802.4 489.99 2883.24 593.504 2883.24 719.695V749.271H2498.76H2498.77ZM2812.27 696.034C2812.27 608.294 2756.08 548.158 2662.42 548.158C2577.64 548.158 2500.74 620.124 2500.74 696.034H2812.27H2812.27Z"/>
+    <path fill="currentColor" d="M3216.46 962.214H3143.5L2956.19 500.837H3034.08L3180.97 889.26H3182.94L3329.83 500.837H3403.77L3216.46 962.214Z"/>
+    <path fill="currentColor" d="M3840.49 979.959C3632.48 979.959 3476.72 825.181 3476.72 613.225C3476.72 401.27 3632.48 246.491 3840.49 246.491C4048.51 246.491 4204.27 401.27 4204.27 613.225C4204.27 825.181 4048.51 979.959 3840.49 979.959ZM3840.49 311.554C3661.07 311.554 3553.61 452.531 3553.61 613.222C3553.61 773.912 3661.07 914.893 3840.49 914.893C4019.92 914.893 4127.38 773.916 4127.38 613.222C4127.38 452.528 4019.92 311.554 3840.49 311.554Z"/>
+    <path fill="currentColor" d="M4334.4 500.837H4399.47V577.734H4401.44C4443.83 515.626 4519.74 489.01 4580.86 489.01C4724.8 489.01 4826.34 592.524 4826.34 731.529C4826.34 870.534 4724.8 974.048 4580.86 974.048C4519.74 974.048 4443.83 947.431 4401.44 885.32H4399.47V1246.14H4334.4V500.837ZM4580.86 548.158C4474.39 548.158 4396.51 628.011 4396.51 731.525C4396.51 835.039 4474.39 914.893 4580.86 914.893C4687.33 914.893 4755.36 835.039 4755.36 731.525C4755.36 628.011 4688.32 548.158 4580.86 548.158Z"/>
+    <path fill="currentColor" d="M5193.06 610.266C5173.34 572.803 5140.81 548.158 5093.49 548.158C5046.17 548.158 4997.86 567.875 4997.86 617.169C4997.86 660.547 5028.42 676.32 5088.56 690.123L5154.61 705.896C5218.69 720.683 5267 767.02 5267 832.083C5267 932.638 5177.29 974.044 5087.58 974.044C5017.58 974.044 4953.5 949.399 4910.12 884.332L4966.32 845.886C4992.93 887.292 5033.36 914.896 5087.58 914.896C5141.8 914.896 5196.02 891.235 5196.02 837.999C5196.02 791.665 5156.58 775.891 5108.28 764.061L5045.18 749.271C5013.63 741.384 4926.88 715.752 4926.88 628.011C4926.88 532.384 5010.68 489.006 5097.43 489.006C5161.51 489.006 5221.65 511.679 5251.22 571.819L5193.06 610.266H5193.06Z"/>
+  </symbol>
+</svg>
+
+<!-- ═══ Slide: Title (split - dark panel + brand gradient) ═══ -->
+<section class="slide title">
+  <div class="title-left">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <h1>Deck <span class="accent">title</span> goes here</h1>
+    <p class="lede">A one-line subtitle that frames the talk.</p>
+    <div class="byline">Speaker Name<small>DrevOps · Event name</small></div>
+  </div>
+  <div class="title-right"><span class="title-orbit"></span></div>
+</section>
+
+<!-- ═══ Slide: Basic light (kicker + h2 + lede + body) ═══ -->
+<section class="slide">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Event name</span>
+  </div>
+  <p class="kicker">Kicker / eyebrow</p>
+  <h2>A standard content heading</h2>
+  <p class="lede">The lede carries the single idea of the slide in one readable sentence.</p>
+  <p>Body copy sits underneath for the detail you speak to but do not read out. Keep it to what earns its place on screen.</p>
+</section>
+
+<!-- ═══ Slide: Section divider (dark) ═══ -->
+<section class="slide dark section-divider">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Event name</span>
+  </div>
+  <p class="kicker">Movement 1</p>
+  <h1>Section divider</h1>
+</section>
+
+<!-- ═══ Slide: Section divider (coral - the antagonist) ═══ -->
+<section class="slide dark section-divider slop-divider">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Event name</span>
+  </div>
+  <p class="kicker slop">The problem</p>
+  <h1>Coral divider</h1>
+</section>
+
+<!-- ═══ Slide: Tool grid (teal cards + one coral card) ═══ -->
+<section class="slide">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Event name</span>
+  </div>
+  <p class="kicker">A grid of items</p>
+  <h2>Tool grid</h2>
+  <div class="tool-grid">
+    <div class="tool-card"><h3><span class="mono">tool-one</span></h3><p>One-line description of the role it plays.</p><p class="url">example.com</p></div>
+    <div class="tool-card"><h3><span class="mono">tool-two</span></h3><p>One-line description of the role it plays.</p><p class="url">example.com</p></div>
+    <div class="tool-card slop-card"><h3>A problem card</h3><p>Coral marks the antagonist. Use sparingly.</p></div>
+  </div>
+</section>
+
+<!-- ═══ Slide: Two-column compare (slop vs clean) ═══ -->
+<section class="slide">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Event name</span>
+  </div>
+  <p class="kicker">Before / after</p>
+  <h2>Two-column compare</h2>
+  <div class="two-col">
+    <div>
+      <p class="col-label slop">The slop</p>
+      <pre class="code"><span class="c">// what the model reaches for</span>
+\Drupal::service('renderer');</pre>
+    </div>
+    <div>
+      <p class="col-label good">The fix</p>
+      <pre class="code"><span class="c">// what your rules require</span>
+<span class="k">public function</span> __construct(
+  <span class="k">protected</span> RendererInterface $renderer,
+) {}</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Slide: Code split (text left, code right) ═══ -->
+<section class="slide code-split">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Event name</span>
+  </div>
+  <div class="code-text">
+    <div class="step-badge">Step badge</div>
+    <h2>Code split</h2>
+    <p class="lede">A short claim on the left.</p>
+    <p class="code-caption">A caption tying the code to the claim.</p>
+  </div>
+  <pre class="code"><span class="c"># a code sample on the right</span>
+<span class="k">foreach</span> ($items <span class="k">as</span> $item) {
+  do_the_thing($item);
+}</pre>
+</section>
+
+<!-- ═══ Slide: Workflow (seven beats + ascii diagram) ═══ -->
+<section class="slide">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Event name</span>
+  </div>
+  <p class="kicker">A sequence</p>
+  <h2>Workflow, wide</h2>
+  <ol class="workflow-list-wide">
+    <li>One</li><li>Two</li><li>Three</li><li>Four</li><li>Five</li><li>Six</li><li>Seven</li>
+  </ol>
+  <p>Numbered stages read left to right; use the ASCII <code>pre.code</code> block for branching flows.</p>
+</section>
+
+<!-- ═══ Slide: Timeline ═══ -->
+<section class="slide">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Event name</span>
+  </div>
+  <p class="kicker">Over time</p>
+  <h2>Timeline</h2>
+  <div class="timeline">
+    <div class="timeline-track"></div>
+    <div class="timeline-point"><div class="year">2021</div><div class="label">First point</div></div>
+    <div class="timeline-point"><div class="year">2022</div><div class="label">Second point</div></div>
+    <div class="timeline-point"><div class="year">2023</div><div class="label">Third point</div></div>
+    <div class="timeline-point"><div class="year">2024</div><div class="label">Fourth point</div></div>
+    <div class="timeline-point"><div class="year">2025</div><div class="label">Fifth point</div></div>
+    <div class="timeline-point"><div class="year">2026</div><div class="label">Now</div></div>
+  </div>
+</section>
+
+<!-- ═══ Slide: Comparison bars ═══ -->
+<section class="slide">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Event name</span>
+  </div>
+  <p class="kicker">Share of something</p>
+  <h2>Comparison bars</h2>
+  <div class="comparison">
+    <div class="comparison-row"><span class="name">Alpha</span><span class="bar"><span class="fill" style="--pct: 46%;"></span></span><span class="pct">46%</span></div>
+    <div class="comparison-row"><span class="name">Beta</span><span class="bar"><span class="fill" style="--pct: 19%;"></span></span><span class="pct">19%</span></div>
+    <div class="comparison-row"><span class="name">Gamma</span><span class="bar"><span class="fill" style="--pct: 9%;"></span></span><span class="pct">9%</span></div>
+  </div>
+</section>
+
+<!-- ═══ Slide: Image split (with placeholder) ═══ -->
+<section class="slide meme-split">
+  <div class="slide-footer" style="z-index:10;">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Event name</span>
+  </div>
+  <div class="meme-text">
+    <p class="kicker">Image + text</p>
+    <h2>Image split</h2>
+    <p class="lede">Text on one side, a screenshot or QR on the other.</p>
+    <p class="punchline">Swap <code>.img-placeholder</code> for <code>&lt;img class="meme-img"&gt;</code>.</p>
+  </div>
+  <div class="img-placeholder">image / QR here<br>class="meme-img"</div>
+</section>
+
+<!-- ═══ Slide: Big statement + punchline (dark) ═══ -->
+<section class="slide dark">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Event name</span>
+  </div>
+  <p class="kicker">Take home</p>
+  <h2 class="big">A single line worth <span class="accent">remembering</span></h2>
+  <p class="lede">One supporting sentence.</p>
+  <hr>
+  <p class="punchline">The quotable version.</p>
+</section>
+
+<!-- ═══ Slide: Stat grid + loop diagram ═══ -->
+<section class="slide">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Event name</span>
+  </div>
+  <p class="kicker">Numbers and loops</p>
+  <h2>Stats and a review loop</h2>
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-number">30%</div><p class="stat-label">A headline metric</p><p class="stat-source">source</p></div>
+    <div class="stat-card"><div class="stat-number">2-3</div><p class="stat-label">A second metric</p><p class="stat-source">observed</p></div>
+  </div>
+  <div class="loop-diagram">
+    <div class="loop-node">Plan</div><div class="loop-arrow">&rarr;</div>
+    <div class="loop-node">Build</div><div class="loop-arrow">&rarr;</div>
+    <div class="loop-node">Review</div>
+  </div>
+</section>
+
+<!-- ═══ Slide: Tier stack (a variable layer on a deterministic foundation) ═══ -->
+<section class="slide">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Event name</span>
+  </div>
+  <p class="kicker">Two-tier concept</p>
+  <h2>Tier stack</h2>
+  <div class="tier-stack">
+    <div class="tier variable">
+      <p class="tier-tag">Variable &middot; dashed</p>
+      <p class="tier-title">The soft layer</p>
+      <p class="tier-desc">Dashed border reads as "guides, does not guarantee".</p>
+    </div>
+    <div class="tier foundation">
+      <p class="tier-tag">Deterministic &middot; solid</p>
+      <p class="tier-title">The foundation</p>
+      <p class="tier-desc">Solid left rule reads as "the floor everything stands on".</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Slide: Layer list (numbered layers; .live for an opt-in row) ═══ -->
+<section class="slide">
+  <div class="slide-footer">
+    <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+    <span class="sep"></span><span class="venue">Event name</span>
+  </div>
+  <p class="kicker">Stacked layers</p>
+  <h2>Layer list</h2>
+  <div class="layer-list">
+    <div class="layer-row"><span class="lr-tag">01 &middot; First</span><div><span class="lr-title">A layer.</span><div class="lr-desc">One line on what this layer checks or does.</div></div></div>
+    <div class="layer-row"><span class="lr-tag">02 &middot; Second</span><div><span class="lr-title">Another layer.</span><div class="lr-desc">One line on what this layer checks or does.</div></div></div>
+    <div class="layer-row live"><span class="lr-tag">Opt-in</span><div><span class="lr-title">A differentiated row.</span><div class="lr-desc">Add <code>.live</code> for a dashed, de-emphasised layer (e.g. a model/opt-in step).</div></div></div>
+  </div>
+</section>
+
+<!-- ═══ Slide: Thanks ═══ -->
+<section class="slide dark thanks">
+  <h1 class="huge">Thank you</h1>
+  <p class="lede">Speaker Name</p>
+  <p class="quiet">DrevOps · Event name</p>
+  <span class="deck-logo"><svg viewBox="0 0 5267 1247"><use href="#drevops-logo"/></svg></span>
+</section>
+
+<div class="slide-number" id="slideNumber"></div>
+
+<script>
+  /* Scroll-snap navigation: arrows / space / PageUp-Down, Home / End, f = fullscreen. */
+  const slides = document.querySelectorAll('.slide');
+  const numberEl = document.getElementById('slideNumber');
+
+  function updateNumber() {
+    const vh = window.innerHeight;
+    const current = Math.round(window.scrollY / vh) + 1;
+    numberEl.textContent = current + ' / ' + slides.length;
+  }
+
+  function goTo(index) {
+    const vh = window.innerHeight;
+    const target = Math.max(0, Math.min(slides.length - 1, index));
+    window.scrollTo({ top: target * vh, behavior: 'smooth' });
+  }
+
+  updateNumber();
+  window.addEventListener('scroll', updateNumber, { passive: true });
+  window.addEventListener('resize', updateNumber);
+
+  document.addEventListener('keydown', (e) => {
+    const vh = window.innerHeight;
+    const current = Math.round(window.scrollY / vh);
+    const advance = ['ArrowDown', 'ArrowRight', 'PageDown', ' '];
+    const retreat = ['ArrowUp', 'ArrowLeft', 'PageUp'];
+
+    if (advance.includes(e.key)) { e.preventDefault(); goTo(current + 1); }
+    else if (retreat.includes(e.key)) { e.preventDefault(); goTo(current - 1); }
+    else if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+    else if (e.key === 'End') { e.preventDefault(); goTo(slides.length - 1); }
+    else if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) { document.documentElement.requestFullscreen?.(); }
+      else { document.exitFullscreen?.(); }
+    }
+  });
+</script>
+
+</body>
+</html>

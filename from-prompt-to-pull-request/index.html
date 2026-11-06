@@ -1,0 +1,2578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>From Prompt to Pull Request - DrupalSouth Wellington 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ds-dark: #1a1a1a;
+      --ds-charcoal: #262626;
+      --ds-lime: #c5e538;
+      --ds-lime-dim: #a7c920;
+      --ds-purple: #7c1bd3;
+      --ds-purple-dim: #6510b5;
+      --ds-cream: #fbefd2;
+      --ds-warm: #fdf6e3;
+      --ds-white: #ffffff;
+      --ds-text: #1a1a1a;
+      --ds-muted: #4a4a4a;
+      --ds-soft: #8a8a8a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--ds-text);
+      background: var(--ds-cream);
+      scroll-snap-type: y mandatory;
+      overflow-y: scroll;
+      height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      letter-spacing: -0.01em;
+    }
+
+    .slide {
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      height: 100vh;
+      max-height: 100vh;
+      padding: 5vh 7vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: var(--ds-cream);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Tighter defaults so slides fit one screen */
+    .slide h1 {
+      font-size: clamp(2.5rem, 5.5vw, 4.75rem);
+      margin-bottom: 1rem;
+    }
+
+    .slide h2 {
+      font-size: clamp(1.85rem, 3.75vw, 3.25rem);
+      margin-bottom: 1rem;
+    }
+
+    .slide h2.big {
+      font-size: clamp(2.25rem, 4.5vw, 3.85rem);
+      margin-bottom: 1rem;
+    }
+
+    .slide p {
+      font-size: clamp(1.05rem, 1.45vw, 1.5rem);
+      line-height: 1.4;
+      margin-bottom: 0.75rem;
+    }
+
+    .slide .lede {
+      font-size: clamp(1.25rem, 1.9vw, 1.95rem);
+      margin-bottom: 1rem;
+    }
+
+    .slide .kicker {
+      margin-bottom: 1.25rem;
+    }
+
+    .slide ul.lead {
+      font-size: clamp(1.05rem, 1.55vw, 1.5rem);
+    }
+
+    .slide ul.lead li {
+      margin-bottom: 0.4rem;
+    }
+
+    .slide hr {
+      margin: 0.85rem 0;
+    }
+
+    .slide.dark {
+      background: var(--ds-charcoal);
+      color: var(--ds-warm);
+    }
+
+    .slide.dark.section-divider {
+      background: var(--ds-dark);
+    }
+
+    .slide.dark .kicker {
+      color: var(--ds-lime);
+    }
+
+    .slide.dark .quiet {
+      color: var(--ds-soft);
+    }
+
+    .slide.dark h2, .slide.dark h1 {
+      color: var(--ds-lime);
+    }
+
+    .slide-footer {
+      position: absolute;
+      bottom: 2.2vh;
+      left: 3vw;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      z-index: 5;
+      opacity: 0.9;
+    }
+
+    .slide-footer img {
+      display: block;
+      height: 28px;
+      width: auto;
+    }
+
+    .slide-footer .drevops-logo {
+      width: 100px;
+      height: 26px;
+      background-image: url('drevops-light.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: left center;
+    }
+
+    .slide.dark .slide-footer .drevops-logo {
+      background-image: url('drevops-dark.png');
+    }
+
+    .slide-footer .sep {
+      width: 1px;
+      height: 20px;
+      background: currentColor;
+      opacity: 0.35;
+    }
+
+    .slide-qr {
+      position: absolute;
+      right: 6vw;
+      top: 50%;
+      transform: translateY(-50%);
+      width: min(38vh, 340px);
+      height: auto;
+      border-radius: 6px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      background: var(--ds-white);
+      padding: 1rem;
+      z-index: 3;
+    }
+
+    .slide.title .slide-footer,
+    .slide.thanks .slide-footer {
+      display: none;
+    }
+
+    .kicker {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      color: var(--ds-purple);
+      margin: 0 0 2.25rem;
+      font-weight: 800;
+    }
+
+    h1 {
+      font-size: clamp(3rem, 7vw, 6rem);
+      font-weight: 900;
+      margin: 0 0 1.5rem;
+      line-height: 0.98;
+      letter-spacing: -0.045em;
+      max-width: 22ch;
+    }
+
+    h2 {
+      font-size: clamp(2.25rem, 4.75vw, 4.25rem);
+      font-weight: 800;
+      margin: 0 0 1.5rem;
+      line-height: 1.02;
+      letter-spacing: -0.035em;
+    }
+
+    h2.big {
+      font-size: clamp(2.75rem, 5.75vw, 5rem);
+      max-width: 30ch;
+    }
+
+    h1.huge {
+      font-size: clamp(5rem, 14vw, 12.5rem);
+      max-width: none;
+      letter-spacing: -0.06em;
+    }
+
+    p {
+      font-size: clamp(1.2rem, 1.75vw, 1.75rem);
+      line-height: 1.45;
+      margin: 0 0 1rem;
+      max-width: 60ch;
+    }
+
+    .lede {
+      font-size: clamp(1.5rem, 2.4vw, 2.4rem);
+      font-weight: 500;
+      line-height: 1.3;
+      max-width: 40ch;
+      letter-spacing: -0.015em;
+    }
+
+    .quiet {
+      color: var(--ds-muted);
+    }
+
+    .accent {
+      color: var(--ds-purple);
+    }
+
+    .slide.dark .accent {
+      color: var(--ds-lime);
+    }
+
+    ul.lead {
+      font-size: clamp(1.2rem, 1.85vw, 1.75rem);
+      line-height: 1.5;
+      margin: 0 0 1rem;
+      padding: 0;
+      list-style: none;
+      max-width: 60ch;
+      font-weight: 500;
+    }
+
+    ul.lead li {
+      padding-left: 1.75rem;
+      position: relative;
+      margin-bottom: 0.55rem;
+    }
+
+    ul.lead li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.62em;
+      width: 0.55rem;
+      height: 0.55rem;
+      background: var(--ds-purple);
+      border-radius: 50%;
+    }
+
+    .slide.dark ul.lead li::before {
+      background: var(--ds-lime);
+    }
+
+    .byline {
+      font-size: clamp(1.1rem, 1.55vw, 1.4rem);
+      font-weight: 600;
+      letter-spacing: 0;
+      margin-top: 1.75rem;
+    }
+
+    /* Title slide */
+    .slide.title {
+      padding: 0;
+      flex-direction: row;
+      overflow: hidden;
+    }
+
+    .title-left {
+      flex: 1 1 58%;
+      background: var(--ds-dark);
+      color: var(--ds-warm);
+      padding: 9vh 5.5vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+    }
+
+    .title-left h1 {
+      color: var(--ds-lime);
+      max-width: 14ch;
+    }
+
+    .title-left .byline {
+      color: var(--ds-warm);
+      margin-top: 1.5rem;
+    }
+
+    .event-logo {
+      align-self: flex-start;
+      height: 2.75rem;
+      width: auto;
+      margin-bottom: 2.5rem;
+    }
+
+    .speaker-logo {
+      position: absolute;
+      bottom: 5.5vh;
+      left: 5.5vw;
+      height: 2rem;
+      width: auto;
+      opacity: 0.9;
+    }
+
+    .title-right {
+      flex: 0 0 42%;
+      background: var(--ds-cream) url('front.png') center/cover no-repeat;
+      overflow: hidden;
+    }
+
+    /* Thanks slide */
+    .slide.thanks {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: var(--ds-dark);
+      color: var(--ds-warm);
+    }
+
+    .slide.thanks h1.huge {
+      color: var(--ds-lime);
+      margin-bottom: 2.5rem;
+    }
+
+    .slide.thanks .lede {
+      color: var(--ds-warm);
+    }
+
+    .slide.thanks .quiet {
+      color: var(--ds-soft);
+    }
+
+    .slide.thanks .speaker-logo {
+      position: static;
+      margin-top: 3rem;
+      height: 2rem;
+      opacity: 0.85;
+    }
+
+    /* Code blocks */
+    pre.code {
+      font-family: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: clamp(0.82rem, 1.1vw, 1.05rem);
+      line-height: 1.6;
+      background: var(--ds-dark);
+      color: var(--ds-warm);
+      padding: 1.25rem 1.75rem;
+      border-left: 5px solid var(--ds-lime);
+      overflow: auto;
+      white-space: pre;
+      margin: 0.75rem 0 0.75rem;
+      max-width: min(95ch, 100%);
+      tab-size: 2;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    pre.code .c {
+      color: var(--ds-soft);
+      font-style: italic;
+    }
+
+    pre.code .k {
+      color: var(--ds-lime);
+    }
+
+    .code-caption {
+      color: var(--ds-muted);
+      font-size: clamp(1.15rem, 1.6vw, 1.5rem);
+      font-weight: 500;
+      margin: 0;
+      max-width: 40ch;
+      line-height: 1.35;
+    }
+
+    .slide.dark .code-caption {
+      color: var(--ds-soft);
+    }
+
+    .meme-caption {
+      color: var(--ds-muted);
+      font-size: clamp(1.15rem, 1.6vw, 1.5rem);
+      font-weight: 500;
+      margin: 0;
+      max-width: 40ch;
+      line-height: 1.35;
+    }
+
+    .slide.dark .meme-caption {
+      color: var(--ds-soft);
+    }
+
+    .slide.dark pre.code {
+      background: var(--ds-charcoal);
+    }
+
+    code {
+      font-family: "Roboto Mono", ui-monospace, monospace;
+      font-size: 0.9em;
+      background: rgba(124, 27, 211, 0.12);
+      color: var(--ds-purple);
+      padding: 0.1em 0.4em;
+      border-radius: 2px;
+      font-weight: 500;
+    }
+
+    .slide.dark code {
+      background: rgba(197, 229, 56, 0.14);
+      color: var(--ds-lime);
+    }
+
+    hr {
+      border: 0;
+      border-top: 3px solid var(--ds-purple);
+      margin: 1.5rem 0;
+      max-width: 5rem;
+    }
+
+    .slide.dark hr {
+      border-top-color: var(--ds-lime);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+      text-decoration-thickness: 2px;
+      text-decoration-color: var(--ds-purple);
+    }
+
+    .slide.dark a {
+      text-decoration-color: var(--ds-lime);
+    }
+
+    .slide-number {
+      position: fixed;
+      bottom: 1rem;
+      right: 1.5rem;
+      font-family: "Roboto Mono", monospace;
+      font-size: 0.7rem;
+      color: var(--ds-muted);
+      background: rgba(251, 239, 210, 0.9);
+      padding: 0.25rem 0.55rem;
+      user-select: none;
+      pointer-events: none;
+      z-index: 100;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+    }
+
+    @media print {
+      body {
+        scroll-snap-type: none;
+        overflow: visible;
+        height: auto;
+      }
+
+      .slide {
+        page-break-after: always;
+        min-height: auto;
+        height: 100vh;
+      }
+
+      .slide-number {
+        display: none;
+      }
+    }
+
+    /* Variant F: extras (carried from variant C) */
+
+    /* Progress bar across the build */
+    .build-progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: var(--ds-lime);
+      z-index: 10;
+    }
+
+    /* Real meme images */
+    .meme-img {
+      max-width: min(700px, 60vw);
+      max-height: 62vh;
+      width: auto;
+      height: auto;
+      border-radius: 6px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
+      margin: 1rem 0;
+      display: block;
+    }
+
+    /* Step badge - shows where we are in the build */
+    .step-badge {
+      display: inline-block;
+      background: var(--ds-purple);
+      color: #ffffff;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.65rem;
+      border-radius: 2px;
+      margin-bottom: 1.2rem;
+      font-family: "Roboto Mono", monospace;
+    }
+
+    .slide.dark .step-badge {
+      background: var(--ds-lime);
+      color: var(--ds-dark);
+    }
+
+    /* Two-column layout for artefact + commentary */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3vw;
+      align-items: start;
+      max-width: 120ch;
+    }
+
+    .two-col .col-label {
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--ds-soft);
+      margin-bottom: 0.6rem;
+    }
+
+    /* Terminal output style */
+    pre.terminal {
+      font-family: "Roboto Mono", ui-monospace, monospace;
+      font-size: clamp(0.78rem, 1vw, 0.95rem);
+      line-height: 1.55;
+      background: #0d1117;
+      color: #c9d1d9;
+      padding: 1rem 1.4rem;
+      border-radius: 6px;
+      margin: 0.75rem 0;
+      max-width: min(80ch, 100%);
+      overflow: auto;
+      white-space: pre;
+    }
+
+    pre.terminal .ok {
+      color: #3fb950;
+    }
+
+    pre.terminal .warn {
+      color: #d29922;
+    }
+
+    pre.terminal .err {
+      color: #f85149;
+    }
+
+    pre.terminal .dim {
+      color: #484f58;
+    }
+
+    pre.terminal .prompt {
+      color: #58a6ff;
+    }
+
+    /* Diff block */
+    pre.diff {
+      font-family: "Roboto Mono", ui-monospace, monospace;
+      font-size: clamp(0.78rem, 1vw, 0.95rem);
+      line-height: 1.55;
+      background: #0d1117;
+      color: #c9d1d9;
+      padding: 1rem 1.4rem;
+      border-radius: 6px;
+      margin: 0.75rem 0;
+      max-width: min(80ch, 100%);
+      overflow: auto;
+      white-space: pre;
+    }
+
+    pre.diff .add {
+      color: #3fb950;
+    }
+
+    pre.diff .del {
+      color: #f85149;
+    }
+
+    pre.diff .meta {
+      color: #58a6ff;
+    }
+
+    /* Meta slide for "talk rewrote itself" */
+    .meta-badge {
+      display: inline-block;
+      border: 2px dashed var(--ds-purple);
+      color: var(--ds-purple);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.8rem;
+      border-radius: 2px;
+      margin-bottom: 1.5rem;
+    }
+
+    .slide.dark .meta-badge {
+      border-color: var(--ds-lime);
+      color: var(--ds-lime);
+    }
+
+    /* PR screenshot mockup */
+    .pr-mockup {
+      background: #ffffff;
+      border: 1px solid #d0d7de;
+      border-radius: 8px;
+      max-width: 58ch;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      font-size: clamp(0.85rem, 1.1vw, 1rem);
+    }
+
+    .pr-header {
+      background: #f6f8fa;
+      border-bottom: 1px solid #d0d7de;
+      padding: 0.65rem 1rem;
+      font-size: 0.8rem;
+      color: #57606a;
+      font-family: "Roboto Mono", monospace;
+    }
+
+    .pr-title {
+      font-weight: 700;
+      font-size: clamp(1rem, 1.3vw, 1.1rem);
+      color: #0969da;
+      padding: 0.7rem 1rem 0.3rem;
+    }
+
+    .pr-body {
+      padding: 0.5rem 1rem 0.85rem;
+      color: #24292f;
+      line-height: 1.5;
+      font-size: clamp(0.82rem, 1vw, 0.95rem);
+      font-family: "Roboto Mono", monospace;
+      white-space: pre-wrap;
+    }
+
+    .pr-comment {
+      border-top: 1px solid #d0d7de;
+      padding: 0.6rem 1rem;
+      background: #fff8c5;
+      font-size: clamp(0.82rem, 1vw, 0.95rem);
+      color: #24292f;
+    }
+
+    .pr-comment strong {
+      color: #953800;
+    }
+
+    .punchline {
+      font-size: clamp(1.65rem, 2.5vw, 2.2rem);
+      font-weight: 600;
+      line-height: 1.3;
+      letter-spacing: -0.015em;
+      color: var(--ds-text);
+      margin-top: 1.25rem;
+      text-decoration: underline;
+      text-decoration-color: var(--ds-purple);
+      text-decoration-thickness: 4px;
+      text-underline-offset: 0.35em;
+      text-decoration-skip-ink: none;
+    }
+
+    .slide.dark .punchline {
+      color: var(--ds-warm);
+      text-decoration-color: var(--ds-lime);
+    }
+
+    .slide.meme-split {
+      flex-direction: row;
+      align-items: center;
+      gap: 4vw;
+      padding: 8vh 6vw;
+    }
+
+    .slide.meme-split .meme-text {
+      flex: 1 1 44%;
+      max-width: 44%;
+    }
+
+    .slide.meme-split .meme-img {
+      flex: 0 0 50%;
+      max-width: 50%;
+      max-height: 78vh;
+      width: auto;
+      margin: 0;
+    }
+
+    .slide.meme-split-reverse {
+      flex-direction: row-reverse;
+    }
+
+    @media (max-width: 900px) {
+      .slide.meme-split {
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      .slide.meme-split .meme-text,
+      .slide.meme-split .meme-img {
+        flex: none;
+        max-width: 100%;
+      }
+    }
+
+    /* Code split layout */
+    .slide.code-split {
+      flex-direction: row;
+      align-items: center;
+      gap: 3vw;
+      padding: 8vh 6vw;
+    }
+
+    .slide.code-split .code-text {
+      flex: 1 1 40%;
+      max-width: 40%;
+    }
+
+    .slide.code-split pre.code {
+      flex: 0 0 56%;
+      max-width: 56%;
+      max-height: 78vh;
+      margin: 0;
+    }
+
+    .slide.code-split.code-split-reverse {
+      flex-direction: row-reverse;
+    }
+
+    /* Single-column text wrapper so step-badges and content don't stretch to slide width */
+    .mem-text {
+      align-self: flex-start;
+      max-width: 60ch;
+    }
+
+    @media (max-width: 900px) {
+      .slide.code-split {
+        flex-direction: column;
+      }
+
+      .slide.code-split .code-text,
+      .slide.code-split pre.code {
+        flex: none;
+        max-width: 100%;
+      }
+    }
+
+    /* Timeline slide */
+    .timeline {
+      position: relative;
+      width: 100%;
+      padding: 0 0 1rem;
+      margin-top: 1.5rem;
+      min-height: 11rem;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0;
+    }
+
+    .timeline-track {
+      position: absolute;
+      top: 4.375rem;
+      left: 8.333%;
+      right: 8.333%;
+      height: 5px;
+      background: linear-gradient(90deg, var(--ds-purple) 0%, var(--ds-lime) 100%);
+      border-radius: 3px;
+      z-index: 1;
+      transform: translateY(-50%);
+    }
+
+    .timeline-point {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      position: relative;
+      z-index: 2;
+      padding: 5.5rem 0.5rem 0;
+    }
+
+    .timeline-point::before {
+      content: "";
+      width: 1.75rem;
+      height: 1.75rem;
+      background: var(--ds-cream);
+      border-radius: 50%;
+      border: 4px solid var(--ds-purple);
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.18);
+      position: absolute;
+      top: 4.375rem;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+    }
+
+    .timeline-point:last-child::before {
+      background: var(--ds-lime);
+      border-color: var(--ds-purple);
+      width: 2rem;
+      height: 2rem;
+      box-shadow: 0 0 16px rgba(197, 229, 56, 0.45);
+    }
+
+    .timeline-point .year {
+      font-weight: 900;
+      font-size: clamp(1.25rem, 2vw, 1.85rem);
+      color: var(--ds-purple);
+      letter-spacing: -0.02em;
+      margin-top: 0.75rem;
+      line-height: 1;
+    }
+
+    .timeline-point .label {
+      font-size: clamp(0.82rem, 1.05vw, 1rem);
+      text-align: center;
+      line-height: 1.3;
+      color: var(--ds-muted);
+      font-weight: 500;
+      max-width: 100%;
+    }
+
+    .slide.dark .timeline-track {
+      background: linear-gradient(90deg, var(--ds-purple) 0%, var(--ds-lime) 100%);
+    }
+
+    .slide.dark .timeline-point::before {
+      background: var(--ds-charcoal);
+      border-color: var(--ds-lime);
+    }
+
+    .slide.dark .timeline-point:last-child::before {
+      background: var(--ds-lime);
+      border-color: var(--ds-lime);
+      box-shadow: 0 3px 16px rgba(197, 229, 56, 0.55);
+    }
+
+    .slide.dark .timeline-point .year {
+      color: var(--ds-lime);
+    }
+
+    .slide.dark .timeline-point .label {
+      color: var(--ds-warm);
+    }
+
+    /* Comparison bars */
+    .comparison {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin: 1.5rem 0;
+      max-width: 42rem;
+    }
+
+    .comparison-row {
+      display: grid;
+      grid-template-columns: 10rem 1fr 4rem;
+      align-items: center;
+      gap: 1rem;
+      font-size: clamp(1rem, 1.5vw, 1.3rem);
+    }
+
+    .comparison-row .name {
+      font-weight: 700;
+    }
+
+    .comparison-row .bar {
+      position: relative;
+      height: 1.75rem;
+      background: rgba(124, 27, 211, 0.12);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .comparison-row .bar .fill {
+      display: block;
+      width: var(--pct);
+      height: 100%;
+      background: var(--ds-purple);
+    }
+
+    .comparison-row .pct {
+      font-weight: 700;
+      font-family: "Roboto Mono", monospace;
+    }
+
+    .slide.dark .comparison-row .bar {
+      background: rgba(197, 229, 56, 0.14);
+    }
+
+    .slide.dark .comparison-row .bar .fill {
+      background: var(--ds-lime);
+    }
+
+    /* Section divider slides */
+    .slide.section-divider {
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .slide.section-divider .kicker {
+      margin-bottom: 1.5rem;
+    }
+
+    .slide.section-divider h1 {
+      font-size: clamp(4rem, 10vw, 8rem);
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+      max-width: 18ch;
+    }
+
+    /* Tool grid */
+    .tool-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1.25rem;
+      margin: 1.5rem 0;
+      max-width: 78rem;
+      width: 100%;
+    }
+
+    .tool-card {
+      padding: 1.25rem;
+      background: rgba(124, 27, 211, 0.06);
+      border-left: 4px solid var(--ds-purple);
+      border-radius: 3px;
+    }
+
+    .tool-card h3 {
+      font-family: "Roboto Mono", ui-monospace, monospace;
+      font-size: clamp(0.95rem, 1.35vw, 1.2rem);
+      font-weight: 700;
+      color: var(--ds-purple);
+      margin: 0 0 0.5rem;
+      letter-spacing: -0.01em;
+    }
+
+    .tool-card p {
+      font-size: clamp(1.05rem, 1.4vw, 1.25rem);
+      color: var(--ds-muted);
+      line-height: 1.4;
+      margin: 0;
+    }
+
+    .tool-card .url {
+      margin: 0.6rem 0 0;
+      font-family: "Roboto Mono", ui-monospace, monospace;
+      font-size: clamp(0.8rem, 1vw, 0.95rem);
+      color: var(--ds-purple);
+      opacity: 0.85;
+    }
+
+    .slide.dark .tool-card {
+      background: rgba(197, 229, 56, 0.08);
+      border-left-color: var(--ds-lime);
+    }
+
+    .slide.dark .tool-card h3 {
+      color: var(--ds-lime);
+    }
+
+    .slide.dark .tool-card p {
+      color: var(--ds-warm);
+    }
+
+    .slide.dark .tool-card .url {
+      color: var(--ds-lime);
+    }
+
+    @media (max-width: 1100px) {
+      .tool-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .tool-url {
+      margin-top: 2rem;
+      font-family: "Roboto Mono", ui-monospace, monospace;
+      font-size: clamp(1.3rem, 2.4vw, 2.2rem);
+      color: var(--ds-purple);
+      word-break: break-all;
+      letter-spacing: -0.01em;
+    }
+
+    .slide.dark .tool-url {
+      color: var(--ds-lime);
+    }
+
+    /* Workflow comparison grid - solo vs team */
+    .workflow-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5rem;
+      margin: 1.5rem 0 0;
+      max-width: 68rem;
+      width: 100%;
+    }
+
+    .workflow-col {
+      background: rgba(197, 229, 56, 0.06);
+      border-left: 4px solid var(--ds-lime);
+      border-radius: 3px;
+      padding: 1.5rem 1.75rem;
+    }
+
+    .workflow-label {
+      font-family: "Roboto Mono", ui-monospace, monospace;
+      font-size: clamp(0.85rem, 1.1vw, 1rem);
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ds-lime);
+      margin-bottom: 1.1rem;
+    }
+
+    .workflow-list {
+      list-style: none;
+      counter-reset: workflow;
+      margin: 0 0 1.1rem;
+      padding: 0;
+    }
+
+    .workflow-list li {
+      counter-increment: workflow;
+      position: relative;
+      padding: 0.35rem 0 0.35rem 2.6rem;
+      font-size: clamp(1.05rem, 1.5vw, 1.35rem);
+      font-weight: 600;
+      color: var(--ds-warm);
+    }
+
+    .workflow-list li::before {
+      content: counter(workflow, decimal-leading-zero);
+      position: absolute;
+      left: 0;
+      top: 0.35rem;
+      font-family: "Roboto Mono", ui-monospace, monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--ds-lime);
+      letter-spacing: 0.05em;
+    }
+
+    .workflow-note {
+      font-size: clamp(0.95rem, 1.2vw, 1.1rem);
+      color: var(--ds-soft);
+      line-height: 1.4;
+      margin: 0;
+    }
+
+    @media (max-width: 900px) {
+      .workflow-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Single-row wide workflow list for the seven-beat slide */
+    .workflow-list-wide {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.6rem;
+      margin: 2rem 0 1rem;
+      max-width: 100%;
+      counter-reset: workflow;
+    }
+
+    .workflow-list-wide li {
+      counter-increment: workflow;
+      padding: 1.1rem 0.65rem 1rem;
+      text-align: center;
+      background: rgba(197, 229, 56, 0.08);
+      border-left: 4px solid var(--ds-lime);
+      border-radius: 3px;
+      color: var(--ds-warm);
+      font-weight: 700;
+      font-size: clamp(0.95rem, 1.3vw, 1.2rem);
+      position: relative;
+    }
+
+    .workflow-list-wide li::before {
+      content: counter(workflow, decimal-leading-zero);
+      display: block;
+      font-family: "Roboto Mono", ui-monospace, monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--ds-lime);
+      letter-spacing: 0.08em;
+      margin-bottom: 0.4rem;
+      position: static;
+      top: auto;
+      left: auto;
+    }
+
+    @media (max-width: 1100px) {
+      .workflow-list-wide {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    /* Light-theme overrides for the workflow lists */
+    .slide:not(.dark) .workflow-list li {
+      color: var(--ds-text);
+    }
+
+    .slide:not(.dark) .workflow-list li::before {
+      color: var(--ds-purple);
+    }
+
+    .slide:not(.dark) .workflow-list-wide li {
+      background: rgba(124, 27, 211, 0.06);
+      border-left-color: var(--ds-purple);
+      color: var(--ds-text);
+    }
+
+    .slide:not(.dark) .workflow-list-wide li::before {
+      color: var(--ds-purple);
+    }
+
+    @media (max-width: 700px) {
+      .workflow-list-wide {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* Feature workflow diagram (Slide 13b) */
+    ol.feature-flow {
+      list-style: none;
+      counter-reset: ff;
+      padding: 0;
+      margin: 1rem 0;
+      display: grid;
+      gap: 0;
+      max-width: 78rem;
+      width: 100%;
+    }
+
+    ol.feature-flow li {
+      counter-increment: ff;
+      display: grid;
+      grid-template-columns: 2.6rem minmax(11rem, 1fr) minmax(14rem, 1.4fr) minmax(0, 2.2fr);
+      align-items: baseline;
+      gap: 1.4rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(124, 27, 211, 0.18);
+      font-size: clamp(0.95rem, 1.25vw, 1.15rem);
+      line-height: 1.4;
+    }
+
+    ol.feature-flow li:last-child {
+      border-bottom: 0;
+    }
+
+    ol.feature-flow li::before {
+      content: counter(ff, decimal-leading-zero);
+      font-family: "Roboto Mono", monospace;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--ds-purple);
+      letter-spacing: 0.06em;
+    }
+
+    ol.feature-flow .ff-stage {
+      font-weight: 700;
+      color: var(--ds-text);
+    }
+
+    ol.feature-flow .ff-tool {
+      font-family: "Roboto Mono", monospace;
+      color: var(--ds-purple);
+      font-size: 0.95em;
+      font-weight: 500;
+    }
+
+    ol.feature-flow .ff-tool code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+
+    ol.feature-flow .ff-desc {
+      color: var(--ds-muted);
+    }
+
+    .slide.dark ol.feature-flow li {
+      border-bottom-color: rgba(197, 229, 56, 0.2);
+    }
+
+    .slide.dark ol.feature-flow li::before {
+      color: var(--ds-lime);
+    }
+
+    .slide.dark ol.feature-flow .ff-stage {
+      color: var(--ds-warm);
+    }
+
+    .slide.dark ol.feature-flow .ff-tool {
+      color: var(--ds-lime);
+    }
+
+    .slide.dark ol.feature-flow .ff-desc {
+      color: var(--ds-soft);
+    }
+
+    @media (max-width: 900px) {
+      ol.feature-flow li {
+        grid-template-columns: 2.6rem 1fr;
+        gap: 0.5rem;
+      }
+
+      ol.feature-flow .ff-tool, ol.feature-flow .ff-desc {
+        grid-column: 2;
+      }
+    }
+
+    /* Numbered step list for the /feature workflow slide */
+    ol.workflow-steps {
+      counter-reset: step;
+      padding-left: 0;
+      margin-top: 0.75rem;
+    }
+
+    ol.workflow-steps li {
+      counter-increment: step;
+      padding-left: 2.6rem;
+      margin-bottom: 0.45rem;
+      font-size: clamp(1rem, 1.4vw, 1.3rem);
+      line-height: 1.35;
+      position: relative;
+    }
+
+    ol.workflow-steps li::before {
+      content: counter(step, decimal-leading-zero);
+      position: absolute;
+      left: 0;
+      top: 0.15em;
+      font-family: "Roboto Mono", ui-monospace, monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--ds-purple);
+      letter-spacing: 0.05em;
+      background: none;
+      width: auto;
+      height: auto;
+      border-radius: 0;
+    }
+
+    .slide.dark ol.workflow-steps li::before {
+      color: var(--ds-lime);
+    }
+
+    /* Review loop diagram */
+    .loop-diagram {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.5rem;
+      align-items: center;
+      margin: 2rem 0 1rem;
+      max-width: 70rem;
+      width: 100%;
+    }
+
+    .loop-node {
+      background: var(--ds-dark);
+      color: var(--ds-lime);
+      border: 2px solid var(--ds-lime);
+      border-radius: 3px;
+      padding: 1.1rem 0.75rem;
+      text-align: center;
+      font-weight: 700;
+      font-size: clamp(0.95rem, 1.3vw, 1.2rem);
+      letter-spacing: -0.01em;
+    }
+
+    .loop-arrow {
+      text-align: center;
+      color: var(--ds-purple);
+      font-size: clamp(1.5rem, 2.2vw, 2rem);
+      font-weight: 900;
+    }
+
+    .slide.dark .loop-node {
+      background: var(--ds-charcoal);
+      color: var(--ds-lime);
+      border-color: var(--ds-lime);
+    }
+
+    .slide.dark .loop-arrow {
+      color: var(--ds-lime);
+    }
+
+    .loop-back {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: var(--ds-purple);
+      font-family: "Roboto Mono", monospace;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      font-style: italic;
+    }
+
+    .slide.dark .loop-back {
+      color: var(--ds-soft);
+    }
+
+    /* Stat callouts for mental health slide */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin: 1.5rem 0;
+      max-width: 60rem;
+    }
+
+    .stat-card {
+      background: rgba(124, 27, 211, 0.08);
+      border-left: 5px solid var(--ds-purple);
+      padding: 1.3rem 1.6rem;
+      border-radius: 3px;
+    }
+
+    .slide.dark .stat-card {
+      background: rgba(197, 229, 56, 0.08);
+      border-left-color: var(--ds-lime);
+    }
+
+    .stat-number {
+      font-size: clamp(2.5rem, 4.5vw, 4.25rem);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      color: var(--ds-purple);
+      margin-bottom: 0.4rem;
+    }
+
+    .slide.dark .stat-number {
+      color: var(--ds-lime);
+    }
+
+    .stat-label {
+      font-size: clamp(1rem, 1.25vw, 1.15rem);
+      font-weight: 600;
+      color: var(--ds-text);
+      margin: 0 0 0.4rem;
+      line-height: 1.3;
+    }
+
+    .slide.dark .stat-label {
+      color: var(--ds-warm);
+    }
+
+    .stat-source {
+      font-size: clamp(0.78rem, 0.95vw, 0.9rem);
+      color: var(--ds-soft);
+      font-family: "Roboto Mono", monospace;
+      margin: 0;
+    }
+
+    @media (max-width: 900px) {
+      .stat-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .loop-diagram {
+        grid-template-columns: 1fr;
+      }
+
+      .loop-arrow {
+        display: none;
+      }
+    }
+
+    /* Mobile: full responsive pass for phones */
+    @media (max-width: 700px) {
+      html, body {
+        scroll-snap-type: none;
+        overflow-x: hidden;
+        height: auto;
+      }
+
+      body {
+        overflow-y: auto;
+      }
+
+      .slide {
+        scroll-snap-align: none;
+        scroll-snap-stop: normal;
+        height: auto;
+        min-height: 100vh;
+        max-height: none;
+        padding: 5vh 5vw 10vh;
+        justify-content: flex-start;
+      }
+
+      .slide.title,
+      .slide.thanks,
+      .slide.section-divider {
+        min-height: 100vh;
+        justify-content: center;
+      }
+
+      .slide-footer {
+        position: absolute;
+      }
+
+      /* Stack reverse-variants on mobile (higher specificity overrides) */
+      .slide.code-split,
+      .slide.code-split.code-split-reverse,
+      .slide.meme-split,
+      .slide.meme-split.meme-split-reverse {
+        flex-direction: column;
+      }
+
+      .slide.code-split .code-text,
+      .slide.code-split pre.code,
+      .slide.meme-split .meme-text,
+      .slide.meme-split .meme-img {
+        flex: none;
+        max-width: 100%;
+        width: 100%;
+      }
+
+      /* Long URLs break at hyphens, not mid-word */
+      .tool-url,
+      .tool-card .url,
+      a {
+        word-break: normal;
+        overflow-wrap: break-word;
+      }
+
+      .slide h1 {
+        font-size: clamp(2rem, 8vw, 2.85rem);
+      }
+
+      .slide h2 {
+        font-size: clamp(1.5rem, 6.5vw, 2.2rem);
+        line-height: 1.05;
+      }
+
+      .slide h2.big {
+        font-size: clamp(1.75rem, 7vw, 2.5rem);
+      }
+
+      .slide p,
+      .slide .lede,
+      .slide ul.lead {
+        font-size: clamp(0.95rem, 3.8vw, 1.1rem);
+        line-height: 1.4;
+      }
+
+      .slide .lede {
+        font-size: clamp(1.05rem, 4.4vw, 1.3rem);
+      }
+
+      .kicker {
+        font-size: 0.7rem;
+        letter-spacing: 0.18em;
+        margin: 0 0 1rem;
+      }
+
+      .step-badge {
+        font-size: 0.65rem;
+        padding: 0.18rem 0.55rem;
+        margin-bottom: 0.85rem;
+      }
+
+      .punchline {
+        font-size: clamp(1.15rem, 5vw, 1.6rem);
+      }
+
+      .byline {
+        font-size: 1rem;
+        margin-top: 1.25rem;
+      }
+
+      .slide-footer {
+        bottom: 1.1rem;
+        left: 5vw;
+        gap: 0.55rem;
+      }
+
+      .slide-footer img {
+        height: 20px;
+      }
+
+      .slide-footer .drevops-logo {
+        width: 70px;
+        height: 18px;
+      }
+
+      .slide-footer .sep {
+        height: 14px;
+      }
+
+      .slide-number {
+        font-size: 0.62rem;
+        padding: 0.18rem 0.45rem;
+        bottom: 0.55rem;
+        right: 0.7rem;
+      }
+
+      /* Title slide: stack vertically, hide decorative image panel */
+      .slide.title {
+        flex-direction: column;
+      }
+
+      .title-left {
+        flex: 1 1 auto;
+        padding: 7vh 6vw;
+      }
+
+      .title-left h1 {
+        max-width: none;
+      }
+
+      .title-right {
+        display: none;
+      }
+
+      .event-logo {
+        height: 2rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .speaker-logo {
+        bottom: 3vh;
+        left: 6vw;
+        height: 1.5rem;
+      }
+
+      .slide.section-divider h1 {
+        font-size: clamp(2.5rem, 13vw, 4.5rem);
+      }
+
+      /* Timeline: wrap into a 2-column grid, drop the connecting track */
+      .timeline-slide {
+        padding-top: 4vh;
+      }
+
+      .timeline {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.1rem 0.75rem;
+        margin-top: 1rem;
+        min-height: auto;
+      }
+
+      .timeline-track {
+        display: none;
+      }
+
+      .timeline-point {
+        padding: 2.25rem 0.25rem 0;
+      }
+
+      .timeline-point::before {
+        top: 1rem;
+        width: 1.2rem;
+        height: 1.2rem;
+        border-width: 3px;
+      }
+
+      .timeline-point:last-child::before {
+        width: 1.35rem;
+        height: 1.35rem;
+      }
+
+      .timeline-point .year {
+        font-size: 1.1rem;
+        margin-top: 0.4rem;
+      }
+
+      .timeline-point .label {
+        font-size: 0.78rem;
+      }
+
+      /* Code, terminal, and diff blocks: smaller text, allow horizontal scroll */
+      pre.code,
+      pre.terminal,
+      pre.diff {
+        font-size: 0.7rem;
+        line-height: 1.55;
+        padding: 0.8rem 0.95rem;
+        max-width: 100%;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* Code-split: already column at 900px - make code area scrollable */
+      .slide.code-split,
+      .slide.meme-split {
+        padding: 4vh 5vw 9vh;
+        gap: 1rem;
+      }
+
+      .slide.code-split pre.code {
+        max-height: 50vh;
+      }
+
+      .slide.meme-split .meme-img {
+        max-height: 38vh;
+      }
+
+      /* Tool grid: single column on phones */
+      .tool-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+
+      .tool-card {
+        padding: 0.9rem 1rem;
+      }
+
+      .tool-card h3 {
+        font-size: 0.95rem;
+      }
+
+      .tool-card p {
+        font-size: 0.95rem;
+      }
+
+      .tool-url {
+        font-size: clamp(1rem, 4.5vw, 1.4rem);
+        margin-top: 1rem;
+      }
+
+      /* Workflow-list-wide: 2 columns (already in 700px rule); shrink padding */
+      .workflow-list-wide {
+        gap: 0.5rem;
+        margin: 1.25rem 0 0.75rem;
+      }
+
+      .workflow-list-wide li {
+        padding: 0.75rem 0.4rem 0.65rem;
+        font-size: 0.85rem;
+      }
+
+      .workflow-list-wide li::before {
+        font-size: 0.65rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .workflow-col {
+        padding: 1.1rem 1.2rem;
+      }
+
+      .workflow-list li {
+        padding: 0.3rem 0 0.3rem 2.2rem;
+        font-size: 0.95rem;
+      }
+
+      /* Stat grid: single column with tighter cards */
+      .stat-card {
+        padding: 0.95rem 1.1rem;
+      }
+
+      .stat-number {
+        font-size: clamp(2rem, 9vw, 2.85rem);
+      }
+
+      .stat-label {
+        font-size: 0.95rem;
+      }
+
+      /* Comparison rows: narrower name column */
+      .comparison-row {
+        grid-template-columns: 5.5rem 1fr 2.75rem;
+        gap: 0.6rem;
+        font-size: 0.9rem;
+      }
+
+      .comparison-row .bar {
+        height: 1.4rem;
+      }
+
+      /* Feature flow: stack stage/tool/desc */
+      ol.feature-flow li {
+        font-size: 0.9rem;
+        gap: 0.4rem 1rem;
+      }
+
+      /* PR mockup: shrink */
+      .pr-mockup {
+        font-size: 0.85rem;
+      }
+
+      .pr-header,
+      .pr-title,
+      .pr-body,
+      .pr-comment {
+        padding-left: 0.85rem;
+        padding-right: 0.85rem;
+      }
+
+      /* Workflow steps tighter */
+      ol.workflow-steps li {
+        padding-left: 2.2rem;
+        font-size: 0.95rem;
+      }
+
+      /* Meta badge smaller */
+      .meta-badge {
+        font-size: 0.7rem;
+        padding: 0.22rem 0.6rem;
+      }
+
+      /* Thanks slide */
+      .slide.thanks h1.huge {
+        font-size: clamp(3.5rem, 18vw, 6rem);
+      }
+
+      .slide.thanks .lede {
+        font-size: clamp(1rem, 4.2vw, 1.25rem);
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Slide 1: Title -->
+<section class="slide title">
+  <div class="title-left">
+    <img class="event-logo" src="ds.png" alt="DrupalSouth Wellington 2026">
+    <h1>From Prompt to Pull Request</h1>
+    <p class="lede">Human-led, AI-assisted Drupal feature work</p>
+    <div class="byline">Alex Skrypnyk</div>
+    <img class="speaker-logo" src="drevops-dark.png" alt="DrevOps">
+  </div>
+  <div class="title-right"></div>
+</section>
+
+<!-- Slide 3: Setup - sharing what works -->
+<section class="slide">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <p class="kicker">Where this talk comes from</p>
+  <h2>I wanted to share what's working for me</h2>
+  <p class="lede">Over the last year or so I've been figuring out how to ship features faster without the quality of what I deliver dropping, and this talk is the version of that I trust enough to take into real client work.</p>
+</section>
+
+<!-- Slide 3: Horizontal timeline -->
+<section class="slide timeline-slide">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <p class="kicker">How we got here</p>
+  <h2>Five years from copy-paste to autonomous</h2>
+  <div class="timeline">
+    <div class="timeline-track"></div>
+    <div class="timeline-point" style="--pos: 0%;">
+      <div class="year">2021</div>
+      <div class="label">Copilot. Autocomplete era</div>
+    </div>
+    <div class="timeline-point" style="--pos: 15%;">
+      <div class="year">2022</div>
+      <div class="label">ChatGPT. Copy-paste era</div>
+    </div>
+    <div class="timeline-point" style="--pos: 35%;">
+      <div class="year">2023</div>
+      <div class="label">Cursor. AI-native IDE</div>
+    </div>
+    <div class="timeline-point" style="--pos: 55%;">
+      <div class="year">2024</div>
+      <div class="label">Devin. First "autonomous"</div>
+    </div>
+    <div class="timeline-point" style="--pos: 80%;">
+      <div class="year">2025</div>
+      <div class="label">Claude Code. Real autonomous</div>
+    </div>
+    <div class="timeline-point" style="--pos: 100%;">
+      <div class="year">2026</div>
+      <div class="label">Autonomous is default</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide dark meme-split">
+  <div class="slide-footer" style="z-index:10;">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <div class="meme-text">
+    <p class="kicker">About the tool</p>
+    <h2>Claude Code. But the discipline travels</h2>
+    <p class="lede">It is what I use, and what the slides will show on screen. The workflow should still hold on Cursor, Copilot, Codex, Antigravity. The commands and ecosystem details will just look different.</p>
+    <p class="quiet">Chart: The Pragmatic Engineer 2026 AI tooling survey (~1,000 responses)</p>
+  </div>
+  <img src="pragmaticengineer-most-loved-2026.png" class="meme-img" alt="The Pragmatic Engineer 2026 AI tooling survey - 'What tools do you love using the most?' Claude Code leads at 46%, Cursor 19%, Claude (model/chat) 17%, Gemini 11%, GitHub Copilot 9%, ChatGPT 8%, OpenAI Codex 8%, with smaller bars for OpenCode, Opus, Perplexity, Antigravity, JetBrains Junie, Windsurf, Augment Code, NotebookLM">
+</section>
+
+
+<!-- Quiet helper 1 of 4: Superwhisper -->
+<section class="slide">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <p class="kicker">Quiet helper &middot; 1 of 4</p>
+  <h2>Superwhisper</h2>
+  <p class="lede">Speech to text for macOS</p>
+  <p>I dictate prompts instead of typing them, and voice produces a longer, more natural brief than typing ever does.</p>
+  <p>Runs a local AI model that makes speech recognition fast</p>
+  <p class="tool-url">superwhisper.com</p>
+</section>
+
+<!-- Quiet helper 2 of 4: superpowers -->
+<section class="slide">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <p class="kicker">Quiet helper &middot; 2 of 4</p>
+  <h2>superpowers</h2>
+  <p class="lede">Gives the agent a set of skills it picks up before acting, plus the instructions to actually use them. It's the layer that turns "random prompts" into "consistent workflow".</p>
+  <p class="tool-url">github.com/obra/superpowers</p>
+</section>
+
+<!-- Quiet helper 3 of 4: claude-mem -->
+<section class="slide">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <p class="kicker">Quiet helper &middot; 3 of 4</p>
+  <h2>claude-mem</h2>
+  <p class="lede">Persistent memory across Claude sessions. Corrections stick, decisions get remembered, and I never re-explain the same thing twice.</p>
+  <p>Adds 50–100 tokens per session for the index lookup of previous conversations</p>
+  <p class="tool-url">github.com/thedotmack/claude-mem</p>
+</section>
+
+<!-- Quiet helper 4 of 4: agent-browser -->
+<section class="slide">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <p class="kicker">Quiet helper &middot; 4 of 4</p>
+  <h2>agent-browser</h2>
+  <p class="lede">Lets the agent drive a real headless browser</p>
+  <p>Navigates the site, fills forms, and screenshots what the editor actually sees, so the agent can verify its own visual changes.</p>
+  <p>Lets agents work in parallel, in the background.</p>
+  <p class="tool-url">github.com/vercel-labs/agent-browser</p>
+</section>
+
+<!-- Slide 4: Section divider - "The workflow" -->
+<section class="slide dark section-divider">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <p class="kicker">Act 1</p>
+  <h1>The workflow</h1>
+</section>
+
+<!-- Slide 6: Design your workflow - the seven beats -->
+<section class="slide">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <p class="kicker">Design your workflow</p>
+  <h2>Seven steps I run on every feature</h2>
+  <ol class="workflow-list workflow-list-wide">
+    <li>Prompt</li>
+    <li>Plan</li>
+    <li>Implement & test</li>
+    <li>Review locally</li>
+    <li>Open and review PR</li>
+    <li>Manual review</li>
+    <li>Merge</li>
+  </ol>
+  <p>A workflow is a markdown file the agent reads when triggered. It defines a sequence of steps and pulls in other workflows or skills along the way.</p>
+  <p>Without one, every feature is twenty fresh prompts.</p>
+  <p>With one, I say <em>"feature &lt;issue URL&gt;"</em> and the agent runs the whole thing.</p>
+</section>
+
+<!-- Slide 6c: Full process diagram including the CodeRabbit remote loop -->
+<section class="slide">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <p class="kicker">Workflow overview</p>
+  <h2>From prompt to merge</h2>
+  <pre class="code" style="max-width: 100%; width: 100%;">"feature &lt;issue URL&gt;"
+         │
+         ▼
+   /feature workflow
+         │
+         │        ┌─── TDD superpowers ───┐
+         ▼        |                       |
+      Plan    ─▶  | Implement   ─▶   Test | ─▶  Review locally    ─▶   Open and review PR   ─▶   Human review   ─▶   Merge
+   /plan skill    |                       |   /coderabbit:review         /open-pr skill
+                  └───────────────────────┘                                    |
+                         ▲                                                     ▼
+                         │                                              wait for CodeRabbit
+                         |                                                  comments
+                         │                                                     │
+                         │                                                     ▼
+                         └─────────── agent fixes or replies ───────── comment lands</pre>
+</section>
+
+<!-- Step 1 of 7: Prompt - divider -->
+<section class="slide dark">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <p class="kicker">Step 1 of 7</p>
+  <h2>Prompt</h2>
+  <p class="lede">I speak at the start of the workflow, and Superwhisper passes the transcript to the agent</p>
+</section>
+
+<!-- Step 2 of 7: Plan - divider -->
+<section class="slide dark meme-split">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <div class="meme-text">
+    <p class="kicker">Step 2 of 7</p>
+    <h2>Plan</h2>
+    <p class="lede">The agent runs a step-by-step wizard, asking follow-up questions as it goes. It drafts the spec for me to sign off, then presents the plan for approval.</p>
+  </div>
+  <img src="plan.png" class="meme-img" alt="Screenshot of a plan session with an agent. The agent has drafted a spec document and listed open questions. The user has typed answers to the questions, and the agent is now asking for approval to proceed with the implementation based on the spec and the answers provided.">
+</section>
+
+<!-- Step 2 of 7: Plan - spec template -->
+<section class="slide code-split code-split-reverse">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <div class="code-text">
+    <div class="step-badge">Step 2 > Plan > Spec template</div>
+    <h2>Spec template used by an agent</h2>
+    <p class="code-caption">The plan session drafts this and clears the open questions</p>
+  </div>
+  <pre class="code"><span class="c"># spec-testimonial-cards.md</span>
+
+<span class="k">## Goal</span>
+One sentence. What does this deliver for the user or editor?
+
+<span class="k">## Acceptance criteria</span>
+- Specific, testable, written as Behat givens if possible.
+
+<span class="k">## In scope</span>
+- What the agent is allowed to build.
+
+<span class="k">## Out of scope</span>
+- What the agent must not touch, even if it seems helpful.
+
+<span class="k">## Dependencies</span>
+- Modules, config, other features this relies on.
+
+<span class="k">## Open questions</span>
+- [ ] Unresolved decisions. Cleared before the ticket is cut.
+
+<span class="k">## Review status</span>
+Draft | In review | Signed off</pre>
+</section>
+
+<!-- Step 3 of 7: Implement - divider -->
+<section class="slide dark code-split">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <div class="slide-text">
+    <p class="kicker">Step 3 of 7</p>
+    <h2>Implement & Test</h2>
+    <p class="lede">The workflow hands the plan and the spec to the agent, which implements them</p>
+    <p>Time to switch to another task or do some stretching/push-ups</p>
+  </div>
+  <pre class="code"><span class="c"># Prompt sent to the agent</span>
+
+Implement the feature described in feature-testimonial-cards.md.
+
+Start with the Drupal config export for the paragraph type,
+then the Twig template. Follow Vortex conventions - config
+goes in config/optional, template in
+web/themes/custom/&lt;theme&gt;/templates/paragraphs/.
+
+Do not create a custom module. Check existing Barrio
+paragraph templates for naming conventions before writing
+anything.</pre>
+</section>
+
+<section class="slide code-split">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <div class="code-text">
+    <div class="step-badge">Step 3 > Implement & Test > TDD red</div>
+    <h2>TDD Superpowers</h2>
+    <p class="lede">Test-Driven Development skill produces a failing test</p>
+    <p>Agent develops a test from the spec: the test itself is drafted, reviewed, and marked as "red" before any implementation runs.</p>
+  </div>
+
+  <pre class="code"><span class="c"># tests/behat/features/testimonial_cards.feature</span>
+
+  <span class="k">Feature:</span> Testimonial cards paragraph on the landing page
+  <span class="k">Scenario:</span> Editor adds testimonial cards to a landing page
+    <span class="k">Given</span> I am logged in as a user with the "content_editor" role
+    <span class="k">And</span> I am editing a landing page
+    <span class="k">When</span> I press "Add Testimonial Cards"
+    <span class="k">And</span> I fill in "Title" with "Real stories"
+    <span class="k">And</span> I fill in "Body" with "From the people we work with"
+    <span class="k">And</span> I attach "portrait.jpg" to "Image"
+    <span class="k">And</span> I press "Save"
+    <span class="k">Then</span> I should be on the landing page
+    <span class="k">And</span> I should see an "h3" element with text "Real stories"
+    <span class="k">And</span> the "img" element should have an "alt" attribute</pre>
+</section>
+
+<section class="slide">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <div class="code-text">
+    <div class="step-badge">Step 3 > Implement & Test > Feature code</div>
+    <h2>Produce feature code per spec</h2>
+    <p class="lede">The agent writes the initial code from the spec</p>
+    <p>This is where other code writing skills and agreements are used</p>
+  </div>
+</section>
+
+<section class="slide code-split">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <div class="code-text">
+    <div class="step-badge">Step 3 > Implement & Test > Resolve issues</div>
+    <h2>Visual confirmation</h2>
+    <p class="lede">The agent uses the <code>agent-browser</code> skill to spawn multiple headless browsers</p>
+    <p>Agent goes to the problematic pages, validates that implementation works, and updates the code as needed</p>
+    <p>Agent iterates on the updated code until the red test passes</p>
+    <p>Screenshots are captured along the way to confirm visual issues are resolved</p>
+    <p class="code-caption">Behat asserts behaviour, while <code>agent-browser</code> asserts what people actually see on the screen.</p>
+  </div>
+
+
+  <pre class="code"><span class="c"># The agent's verification, after the test pass</span>
+
+agent-browser navigate \
+  https://local/node/add/landing_page
+
+agent-browser fill "Title" "Real stories"
+agent-browser click "Add Testimonial Cards"
+agent-browser screenshot \
+  .artifacts/tmp/testimonial-cards-rendered.png
+
+<span class="c"># Output:</span>
+<span class="c"># &gt; .artifacts/tmp/testimonial-cards-rendered.png (saved)</span>
+<span class="c"># &gt; h3 detected, alt attribute present</span></pre>
+</section>
+
+<section class="slide">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <div class="code-text">
+    <div class="step-badge">Step 3 > Implement & Test > TDD green</div>
+    <h2>TDD tests marked as green</h2>
+    <p class="lede">The agent marks the TDD step complete and moves on</p>
+  </div>
+</section>
+
+<section class="slide dark">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <p class="kicker">Step 4 of 7</p>
+  <h2>Review locally</h2>
+  <p class="lede">The agent runs CodeRabbit CLI locally before opening a PR, and CodeRabbit also reviews the PR once it's open</p>
+  <p>It has enough coding and architectural knowledge to catch 80% of issues</p>
+</section>
+
+<section class="slide">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <div class="code-text">
+    <div class="step-badge">Step 4 > Review locally > Review and re-test</div>
+    <h2>Local review and remediation loop</h2>
+    <p class="lede">The agent runs the workflow that runs the local review pass before opening a PR</p>
+    <p>Before the diff leaves my laptop, the agent runs <code>/coderabbit:review</code> locally and auto-remediates the Critical and Major findings.</p>
+    <p>The <code>simplify</code> skill catches reused-elsewhere drift and dead code.</p>
+    <p>Existing green tests run again</p>
+  </div>
+</section>
+
+<section class="slide dark">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <p class="kicker">Step 5 of 7</p>
+  <h2>Open & review PR</h2>
+  <p class="lede">The agent opens the pull request with a dedicated skill</p>
+</section>
+
+<section class="slide meme-split">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <div class="code-text">
+    <div class="step-badge">Step 5 > Open & review PR > PR format</div>
+    <h2>Format for your PRs</h2>
+    <p class="lede">A dedicated skill to format my PRs</p>
+    <p>Formats the subject and description</p>
+    <p>Provides architectural diagrams</p>
+    <p>Explains before/after in high-level terms</p>
+  </div>
+  <img src="pr-description.png" class="meme-img" alt="">
+</section>
+
+<section class="slide">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <div class="code-text">
+    <div class="step-badge">Step 5 > Open & review PR > Checks</div>
+    <h2>Wait for PR checks</h2>
+    <p class="lede">The agent waits for the checks to pass</p>
+    <p>Checks are CI jobs and other conditions configured to consider the PR as "ready to be merged"</p>
+    <p>CodeRabbit check will wait for the review</p>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <div class="code-text">
+    <div class="step-badge">Step 5 > Open & review PR > Resolve</div>
+    <h2>Resolve and iterate</h2>
+    <p class="lede">The agent works through the review feedback</p>
+    <p>The agent assesses each review comment, either addressing it or bouncing it back with a reason</p>
+    <p>Resolution is considered complete only when every review comment has a reply</p>
+  </div>
+</section>
+
+<section class="slide meme-split">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <div class="code-text">
+    <div class="step-badge">Step 5 > Open & review PR > Notify</div>
+    <h2>Notify that PR is ready for a review</h2>
+    <p class="lede">The agent reports back only when it's ready for review</p>
+  </div>
+  <img src="pr-human-review-ready.png" class="meme-img" alt="Screenshot of a PR comment by the agent saying 'All checks have passed and I have resolved all comments. This PR is ready for your review.'">
+</section>
+
+<section class="slide dark">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <p class="kicker">Step 6 of 7</p>
+  <h2 class="big">Manual review is what really matters</h2>
+  <p class="lede">Automation got you here. Now it is time for human eyes</p>
+  <p>Read every line</p>
+  <p>Ask <em>why</em>, not just <em>what</em>. Agents will explain in detail</p>
+  <p>Push back on anything that seems off, no matter how small</p>
+</section>
+
+<!-- Step 8 of 7: Merge - divider -->
+<section class="slide dark">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <p class="kicker">Step 7 of 7</p>
+  <h2>Merge</h2>
+  <p class="lede">The PR closes when the loop has nothing left to say</p>
+</section>
+
+<!-- Slide 15: Section divider - Act 2 - "The tooling" -->
+<section class="slide dark section-divider">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <p class="kicker">Act 2</p>
+  <h1>The tooling</h1>
+</section>
+
+<!-- Slide 26: Phase / Version ~/.claude - concept -->
+<section class="slide code-split">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <div class="code-text">
+    <p class="kicker">Tracking the agent config</p>
+    <h2>Track <code>~/.claude/</code> directory as a git repo</h2>
+    <ul class="lead">
+      <li>Skills compound, so each one is a solved problem I never re-solve</li>
+      <li>Memory persists, so corrections in one session carry into the next</li>
+      <li>An auto-commit hook fires when the agent session ends, committing and pushing any change to <code>~/.claude/</code></li>
+    </ul>
+  </div>
+  <pre class="code"><span class="c">#!/bin/sh
+# ~/.claude/hooks/post-session.sh
+# Auto-commit ~/.claude changes after every session.</span>
+
+cd "$HOME/.claude"
+
+<span class="k">if</span> git diff --quiet &amp;&amp; git diff --staged --quiet; then
+  exit 0
+<span class="k">fi</span>
+
+git add -A
+git commit -m "Session update: skills, settings, memory."
+git push</pre>
+</section>
+
+<!-- Slide 19: Step / Artifacts containment -->
+<section class="slide code-split">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <div class="code-text">
+    <p class="kicker">Artifacts</p>
+    <h2>Everything the agent produces lives in the project</h2>
+    <p class="code-caption">If it is not in the repo, it did not happen</p>
+  </div>
+  <pre class="code">my-drupal-project/
+├── .artifacts/           <span class="c"># globally .gitignore'd</span>
+│   ├── tmp/              <span class="c"># agent scratch, gitignored</span>
+│   ├── reports/          <span class="c"># CI output, coverage</span>
+│   └── logs/
+├── .claude/
+│   ├── settings.json
+│   ├── commands/
+│   └── hooks/
+│       └── pre-tool-use.sh   <span class="c"># our &amp;&amp;-blocker</span>
+├── .github/
+├── web/
+└── vendor/</pre>
+</section>
+
+<!-- Slide 16: Step / Permissions allowlist -->
+<section class="slide code-split">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <div class="code-text">
+    <p class="kicker">Permissions</p>
+    <h2>One file. Zero interruptions</h2>
+    <p>The agent asked to run <code>git status</code> 40 times before I wrote a single file. I fix this once.</p>
+  </div>
+  <pre class="code"><span class="c">// .claude/settings.json</span>
+{
+  "permissions": {
+    "allow": [
+      "Bash(composer:*)",
+      "Bash(drush:*)",
+      "Bash(ahoy:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(phpunit:*)",
+      "WebFetch(domain:drupal.org)"
+    ]
+  }
+}</pre>
+</section>
+
+<!-- Slide 17: Step / Hooks (block chained bash) -->
+<section class="slide code-split code-split-reverse">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <div class="code-text">
+    <p class="kicker">Hooks</p>
+    <h2>One pre-tool-use hook blocks chained bash before it happens</h2>
+    <p>Unchecked, the agent chains shell commands together with <code>&amp;&amp;</code>, and one partial failure in the middle of a chain can leave the repo in a state nothing on the planet wants to be in.</p>
+    <p class="code-caption">Solve it once with a small hook and you never have to think about it again</p>
+  </div>
+  <pre class="code"><span class="c">#!/bin/sh
+# .claude/hooks/pre-tool-use.sh
+# Block chained bash commands.</span>
+
+cmd=$(cat | jq -r '.tool_input.command')
+
+if echo "$cmd" | grep -qE '(&amp;&amp;|;|\$\()'; then
+  echo "One command per call. Split it." &gt;&amp;2
+  exit 2
+fi</pre>
+</section>
+
+<!-- Slide 21: Step / Custom architectural rule scripts (concept + code) -->
+<section class="slide code-split">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <div class="code-text">
+    <p class="kicker">Custom rules</p>
+    <h2>A plain script to encode rules</h2>
+    <p>A small script in PHP (or any language). Codifies architectural rules that standard lint knows nothing about.</p>
+    <p class="code-caption">Runs in CI and as a pre-commit hook. Catches drift before the PR</p>
+  </div>
+  <pre class="code"><span class="c">#!/usr/bin/env php
+// scripts/arch-rules.php
+// Runs in CI, alongside lint + tests. Fails on violation.</span>
+
+$violations = [];
+
+<span class="c">// Rule: no static service calls in custom code.</span>
+<span class="k">foreach</span> (glob('web/modules/custom/**/*.php') <span class="k">as</span> $file) {
+  <span class="k">if</span> (preg_match('/\\\\Drupal::service\\(/', file_get_contents($file))) {
+    $violations[] = "$file: use constructor injection";
+  }
+}
+
+<span class="c">// Rule: Behat features live under tests/Behat/Features/.</span>
+<span class="k">if</span> (is_dir('features')) {
+  $violations[] = 'features/ exists - move to tests/Behat/Features/';
+}
+
+<span class="c">// Rule: testimonial_cards twig templates need BEM root.</span>
+<span class="k">foreach</span> (glob('web/themes/**/paragraph--testimonial-cards*.twig') <span class="k">as</span> $f) {
+  <span class="k">if</span> (!str_contains(file_get_contents($f), 'testimonial-card')) {
+    $violations[] = "$f: missing .testimonial-card BEM root";
+  }
+}
+
+<span class="k">if</span> ($violations) {
+  fwrite(STDERR, implode("\n", $violations) . "\n");
+  exit(1);
+}</pre>
+</section>
+
+<!-- Slide 22b: The skill that writes skills -->
+<section class="slide">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <p class="kicker">On writing skills</p>
+  <h2>I don't write skills. I ask the agent to</h2>
+  <p>A skill is a markdown file the agent reads before acting. It encodes the constraints, conventions, and edge cases I have already solved, so every session after that inherits the answer.</p>
+  <p>The skills that matter encode your team's decisions and your project's conventions. So the most useful thing I can share is
+    <code>superpowers:writing-skills</code>, the skill the agent uses to write new skills. I describe the pattern, it drafts the file, the next session picks it up.</p>
+</section>
+
+<!-- Slide: Discipline / Parallel work - clones, not worktrees -->
+<section class="slide">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <p class="kicker">Working in parallel</p>
+  <h2>For Drupal, I clone the project, not git worktree it</h2>
+  <p>Worktrees give you a checkout without an environment around it, which is fine on a static codebase. A Drupal feature usually depends on a running database, an imported config, an installed site, and without that I cannot really review what the agent is building.</p>
+  <p>So for each branch I clone the project into its own directory, with its own database and its own running site, and the agent works against a real environment.</p>
+  <p class="punchline">Old school, on purpose. Full control at every stage</p>
+</section>
+
+<!-- Slide: Discipline / Cloud agents - the next iteration -->
+<section class="slide">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <p class="kicker">What's next</p>
+  <h2>Cloud agents are still the next iteration for me</h2>
+  <p>The idea of running an agent somewhere in the cloud rather than on my laptop, end-to-end, with its own environment that I do not have to keep open in front of me, is where this workflow is going next. I just have not got to implementing it yet.</p>
+  <p>So the next iteration is to reuse the same feature workflow and the same skills, but in the cloud, so an agent can take a Drupal feature end-to-end without me holding the laptop open.</p>
+</section>
+
+<!-- Slide 29: Section divider - Act 5 - "Mental load" -->
+<section class="slide dark section-divider">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <p class="kicker">Act 3</p>
+  <h1>Mental load</h1>
+</section>
+
+<!-- Slide 30a: The context switching -->
+<section class="slide">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <p class="kicker">What this costs</p>
+  <h2 class="big">The context switching</h2>
+  <p class="lede">Several agents running. My whole day turns into review mode. Holding multiple unfinished diffs in my head is genuinely heavy.</p>
+  <hr>
+  <p class="punchline">I cap concurrent agents at two or three, batch review into fixed windows, and stop reacting to every notification</p>
+</section>
+
+<!-- Slide 30b: The fear of drift -->
+<section class="slide">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <p class="kicker">What this costs</p>
+  <h2 class="big">The fear of drift</h2>
+  <p class="lede">Even with the rules in place, drift shows up in the pull request. I wait for the agent to finish, the PR lands, the diff has wandered from what I wanted. Some context I never said out loud, and the rework eats the time the run was meant to save.</p>
+  <hr>
+  <p class="punchline">It's not that different from briefing a human badly: I add the missing context and run it again</p>
+</section>
+
+<!-- Slide 30c: The fear of running out -->
+<section class="slide">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <p class="kicker">What this costs</p>
+  <h2 class="big">The fear of running out</h2>
+  <p class="lede">A meter ticking at the back of my head. How much have I used. Is there enough left for this session. If not, what gets prioritised, what gets cut, what waits until the window resets.</p>
+  <hr>
+  <p class="punchline">I scope each session to one task, hand over between sessions with <code>claude-mem</code>, compact instead of re-explaining, and delete stale artefacts as I go</p>
+</section>
+
+<!-- Slide 34: Section divider - Act 4 - "What I leave you with" -->
+<section class="slide dark section-divider">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <p class="kicker">Act 4</p>
+  <h1>What I leave you with</h1>
+</section>
+
+<!-- Slide 35: AI is a force multiplier -->
+<section class="slide">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <p class="kicker">Take home</p>
+  <h2 class="big">AI is a <span class="accent">force multiplier</span></h2>
+  <p class="lede">It does not remove engineering. It removes the friction around engineering.</p>
+  <hr>
+  <p class="punchline">You are still the engineer</p>
+</section>
+
+
+<!-- Slide 30b: Decisions - we still own them, they need context -->
+<section class="slide">
+  <div class="slide-footer">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <p class="kicker">What I still own</p>
+  <h2>Writing the code is no longer the hard part. Knowing what to write is.</h2>
+  <p>The decisions do not go away when an agent joins the work, they concentrate, and the agent cannot pull them out of thin air because it does not have the context the decisions depend on.</p>
+  <p class="punchline">Context is the input and judgement is the output, so gathering the context is the engineering work that did not get easier</p>
+</section>
+
+
+<!-- Slide 35b: When AI is blocked on the client repo -->
+<section class="slide meme-split">
+  <div class="slide-footer" style="z-index:10;">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <div class="meme-text">
+    <p class="kicker">Working around no-AI policies</p>
+    <h2>When AI is blocked on the client repo: contribute around it</h2>
+    <ul class="lead">
+      <li>Build the feature as an open-source contrib module</li>
+      <li>A small hand-written glue module installs it in the client repo</li>
+      <li>Community gets a reusable module. Policy stays honest</li>
+    </ul>
+    <p class="punchline"><code>drupal_extension_scaffold</code> scaffolds the contrib module in minutes</p>
+  </div>
+  <img src="des_qr.png" class="meme-img" alt="QR code to drupal_extension_scaffold - the DrevOps scaffold for contributing Drupal modules and themes">
+</section>
+
+<!-- Slide 36: drevops/vortex -->
+<section class="slide meme-split meme-split-reverse">
+  <div class="slide-footer" style="z-index:10;">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <div class="meme-text">
+    <p class="kicker">Take this with you</p>
+    <h2><code>drevops/vortex</code></h2>
+    <ul class="lead">
+      <li>Drupal project template for every consumer Drupal site</li>
+      <li>CI, config, environment parity, ready to go</li>
+      <li>The guardrail tooling that makes the workflow we covered possible</li>
+    </ul>
+    <p><a href="https://github.com/drevops/vortex">github.com/drevops/vortex</a></p>
+  </div>
+  <img src="vortex_qr.png" class="meme-img" alt="QR code to drevops/vortex - the DrevOps Drupal scaffold for consumer sites">
+</section>
+
+<!-- Slide 37: "Personally, AI is liberating" (dark, meme-split) -->
+<section class="slide dark meme-split">
+  <div class="slide-footer" style="z-index:10;">
+    <div class="drevops-logo"></div>
+    <span class="sep"></span><img src="ds.png" alt="DrupalSouth Wellington 2026"></div>
+  <div class="meme-text">
+    <p class="kicker">Personally</p>
+    <h2 class="big">AI lets me build the ideas I would never have had time for</h2>
+  </div>
+  <img src="bathroom-tile-calendar.jpg" class="meme-img" alt="Bathroom tile calendar meme - rows of tiles tracking work done day by day, illustrating the volume of ideas you can finally ship when AI removes the friction around engineering">
+</section>
+
+<!-- Slide 38: Thanks / Questions -->
+<section class="slide dark thanks">
+  <h1 class="huge">Thank you</h1>
+  <p class="lede">Alex Skrypnyk</p>
+  <p class="quiet">DrevOps · DrupalSouth Wellington 2026</p>
+</section>
+
+<div class="slide-number" id="slideNumber"></div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const numberEl = document.getElementById('slideNumber');
+
+  function updateNumber() {
+    const vh = window.innerHeight;
+    const current = Math.round(window.scrollY / vh) + 1;
+    numberEl.textContent = current + ' / ' + slides.length;
+  }
+
+  function goTo(index) {
+    const vh = window.innerHeight;
+    const target = Math.max(0, Math.min(slides.length - 1, index));
+    window.scrollTo({
+      top: target * vh,
+      behavior: 'smooth'
+    });
+  }
+
+  updateNumber();
+  window.addEventListener('scroll', updateNumber, {passive: true});
+  window.addEventListener('resize', updateNumber);
+
+  document.addEventListener('keydown', (e) => {
+    const vh = window.innerHeight;
+    const current = Math.round(window.scrollY / vh);
+    const advance = ['ArrowDown', 'ArrowRight', 'PageDown', ' '];
+    const retreat = ['ArrowUp', 'ArrowLeft', 'PageUp'];
+
+    if (advance.includes(e.key)) {
+      e.preventDefault();
+      goTo(current + 1);
+    }
+    else if (retreat.includes(e.key)) {
+      e.preventDefault();
+      goTo(current - 1);
+    }
+    else if (e.key === 'Home') {
+      e.preventDefault();
+      goTo(0);
+    }
+    else if (e.key === 'End') {
+      e.preventDefault();
+      goTo(slides.length - 1);
+    }
+    else if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen?.();
+      }
+      else {
+        document.exitFullscreen?.();
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
