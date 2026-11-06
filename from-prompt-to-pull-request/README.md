@@ -11,3 +11,4 @@ A talk by Alex Skrypnyk on a production-tested workflow for AI-assisted Drupal d
 
 - [Open the deck online](https://alexskrypnyk.github.io/slides/from-prompt-to-pull-request/).
 - To present from a local copy, open [index.html](index.html) in a browser and press <kbd>F</kbd> for fullscreen. The arrow keys move between slides.
+- [from-prompt-to-pull-request.pdf](from-prompt-to-pull-request.pdf) is the PDF export.

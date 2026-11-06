@@ -186,6 +186,13 @@
       box-shadow: 0 0 60px color-mix(in srgb, var(--accent-bright) 45%, transparent);
     }
 
+    .title-right.logo::before,
+    .title-right.logo::after { display: none; }
+    .title-logo {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 50%; height: auto; filter: drop-shadow(0 10px 30px rgba(3, 13, 30, 0.35));
+    }
+
     .slide.thanks {
       align-items: center; justify-content: center; text-align: center;
       background: var(--deck-darker); color: var(--deck-warm);
@@ -349,7 +356,14 @@
     <p class="lede">Drupal Extension, Drupal Driver and Behat Steps, now a single library for Behat 4 and Drupal 12.</p>
     <div class="byline">Alex Skrypnyk<small>Director, DrevOps · Drupal Meetup</small></div>
   </div>
-  <div class="title-right"><span class="title-orbit"></span></div>
+  <div class="title-right logo">
+    <svg class="title-logo" viewBox="245 105 365 355" role="img" aria-label="Behat Steps logo">
+      <rect fill="#2b77cd" x="257" y="188.5" width="62" height="259" rx="16" transform="rotate(3.9 288 318)"/>
+      <rect fill="#6dc243" x="355" y="161" width="62" height="287.5" rx="16"/>
+      <rect fill="#fc822f" x="447" y="133" width="62" height="315.5" rx="16"/>
+      <rect fill="#fbc237" x="537" y="115" width="62" height="333.5" rx="16"/>
+    </svg>
+  </div>
 </section>
 
 <!-- 2. The long road -->

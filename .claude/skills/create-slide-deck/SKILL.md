@@ -1,6 +1,6 @@
 ---
 name: create-slide-deck
-description: Create a new slide deck in this repository from the template, then add it to the root index page and README. Use when asked to "create a slide deck", "new slides for a talk", "start a deck", "make slides about X" or "/create-slide-deck".
+description: Create a new slide deck in this repository from the template, export it to PDF, then add it to the root index page and README. Use when asked to "create a slide deck", "new slides for a talk", "start a deck", "make slides about X" or "/create-slide-deck".
 ---
 
 # Create a slide deck
@@ -37,6 +37,7 @@ Create a new deck from `template/index.html` in its own folder at the repository
    - The `<title>` is the talk's title.
    - The title slide's `h1`, `.lede` and `.byline`.
    - Every `.venue` footer label reads the event's name in place of `Event name`.
+   - When the talk is about a product with a logo, replace the `.title-orbit` in `.title-right` with the logo as inline SVG. `behat-steps-4/index.html` shows the markup and the `.title-right.logo` CSS that hides the orbit rings.
 
 5. Delete the template's example slides and write the deck's own slides from the content, using the template's components. Keep the title slide first and the thanks slide last.
 
@@ -65,7 +66,15 @@ Create a new deck from `template/index.html` in its own folder at the repository
 
    When the title slide shows a year, such as an event badge, hide that element with the same `eval` before the screenshot. Read the PNG and confirm it shows the title slide with no year on it. Then close the session with `agent-browser --session deckcheck close`.
 
-8. Write `<folder>/README.md` in this shape:
+8. Export the PDF with the local `convert` skill's HTML-to-PDF script. It renders through Gotenberg in Docker, 1 slide per A4 page:
+
+   ```bash
+   php ~/.claude/skills/convert/scripts/convert-html-to-pdf.php <folder>/index.html <folder>/<folder>.pdf --unbranded
+   ```
+
+   Confirm with `pdfinfo <folder>/<folder>.pdf` that the page count equals the number of `<section class="slide` elements in the deck. When the script doesn't exist or fails, such as when Docker isn't running, skip the PDF, leave its line out of the README and tell the user the PDF wasn't made.
+
+9. Write `<folder>/README.md` in this shape:
 
    ```markdown
    # <Talk title>
@@ -81,11 +90,10 @@ Create a new deck from `template/index.html` in its own folder at the repository
 
    - [Open the deck online](https://alexskrypnyk.github.io/slides/<folder>/).
    - To present from a local copy, open [index.html](index.html) in a browser and press <kbd>F</kbd> for fullscreen. The arrow keys move between slides.
+   - [<folder>.pdf](<folder>.pdf) is the PDF export.
    ```
 
-   List a PDF export under **Slides** when the folder has one.
-
-9. Add the deck to the root `index.html` as the first card in `.deck-grid`, so the newest deck comes first. The card carries the title and the preview only:
+10. Add the deck to the root `index.html` as the first card in `.deck-grid`, so the newest deck comes first. The card carries the title and the preview only:
 
    ```html
    <a class="deck-card" href="<folder>/index.html">
@@ -94,12 +102,12 @@ Create a new deck from `template/index.html` in its own folder at the repository
    </a>
    ```
 
-10. Add a row for the deck at the top of the **Decks** table in the root `README.md`.
+11. Add a row for the deck at the top of the **Decks** table in the root `README.md`.
 
-11. Open the root `index.html` in the isolated session and confirm that the new card shows its preview and opens the deck.
+12. Open the root `index.html` in the isolated session and confirm that the new card shows its preview and opens the deck.
 
-12. Commit the deck folder, `index.html` and `README.md` with explicit paths. Push only when the user asks: a push to `main` publishes the deck on GitHub Pages.
+13. Commit the deck folder, `index.html` and `README.md` with explicit paths. Push only when the user asks: a push to `main` publishes the deck on GitHub Pages.
 
 ## Present and export
 
-<kbd>F</kbd> toggles fullscreen, and the arrow keys, <kbd>Space</kbd>, <kbd>PageUp</kbd> and <kbd>PageDown</kbd> move between slides. To export a PDF, print the deck from the browser and save it as a PDF; the print styles put each slide on its own page.
+<kbd>F</kbd> toggles fullscreen, and the arrow keys, <kbd>Space</kbd>, <kbd>PageUp</kbd> and <kbd>PageDown</kbd> move between slides. Step 8 exports the PDF. To export one without the script, print the deck from the browser and save it as a PDF; the print styles put each slide on its own page.

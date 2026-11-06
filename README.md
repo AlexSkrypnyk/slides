@@ -15,20 +15,21 @@ Each deck's `README.md` says where and when the talk was given.
 ## How the repository is laid out
 
 - Each deck lives in its own folder at the repository root, named after the talk in lowercase with hyphens.
-- A deck folder holds the deck as `index.html`, its images, a `preview.png` of the title slide and a `README.md`.
+- A deck folder holds the deck as `index.html`, its images, a PDF export named after the folder, a `preview.png` of the title slide and a `README.md`.
 - The root `index.html` shows a card with the name and preview of every deck.
 - [template/](template/) holds the template for new decks and describes its components.
 
 ## Add a deck
 
-With Claude Code, run the `create-slide-deck` skill from the repository root. It creates the deck folder from the template, writes the deck's `README.md`, takes the preview and adds the deck to the index page and to the [Decks](#decks) table.
+With Claude Code, run the `create-slide-deck` skill from the repository root. It creates the deck folder from the template, writes the deck's `README.md`, takes the preview, exports the PDF and adds the deck to the index page and to the [Decks](#decks) table.
 
 To add a deck by hand:
 
 1. Follow [the template's README](template/README.md) to create the deck folder and its `index.html`.
 2. Write the deck's `README.md` with the talk's name, a summary and where and when it was given.
 3. Save a 1600 × 900 screenshot of the title slide as `preview.png` in the deck folder.
-4. Add a card for the deck as the first `<a class="deck-card">` in the root `index.html`, and a row at the top of the [Decks](#decks) table.
+4. Print the deck from the browser to a PDF named after the folder, such as `behat-steps-4/behat-steps-4.pdf`.
+5. Add a card for the deck as the first `<a class="deck-card">` in the root `index.html`, and a row at the top of the [Decks](#decks) table.
 
 Keep dates and venues off the slides and the index page. They belong in the deck's `README.md`.
 

@@ -11,3 +11,4 @@ A talk by Alex Skrypnyk on Behat Steps 4.0.0, which brings Drupal Extension and 
 
 - [Open the deck online](https://alexskrypnyk.github.io/slides/behat-steps-4/).
 - To present from a local copy, open [index.html](index.html) in a browser and press <kbd>F</kbd> for fullscreen. The arrow keys move between slides.
+- [behat-steps-4.pdf](behat-steps-4.pdf) is the PDF export.
