@@ -9,6 +9,9 @@ Slide decks from talks by Alex Skrypnyk. Every deck is a single HTML file you ca
 | Behat Steps 4: Drupal 12-ready testing in 1 package | [behat-steps-4](behat-steps-4/) |
 | Making AI work for you: Minimising AI slop on Drupal projects | [making-ai-work-for-you](making-ai-work-for-you/) |
 | From Prompt to Pull Request | [from-prompt-to-pull-request](from-prompt-to-pull-request/) |
+| Five Years Late, Still On Time: mentalhealthonline.org.au Drupal 8 to 11 journey | [five-years-late-still-on-time](five-years-late-still-on-time/) |
+| Setup projects and onboard developers in minutes with Vortex | [setup-projects-with-vortex](setup-projects-with-vortex/) |
+| Local-CI-Production workflow with DrevOps | [local-ci-production-workflow-with-drevops](local-ci-production-workflow-with-drevops/) |
 
 Each deck's `README.md` says where and when the talk was given.
 
@@ -16,6 +19,7 @@ Each deck's `README.md` says where and when the talk was given.
 
 - Each deck lives in its own folder at the repository root, named after the talk in lowercase with hyphens.
 - A deck folder holds the deck as `index.html`, its images, a PDF export named after the folder, a `preview.png` of the title slide and a `README.md`.
+- A deck built in Google Slides keeps 1 exported image per slide in `slides/`. Its `index.html` shows those images with the same keyboard controls as the HTML decks.
 - The root `index.html` shows a card with the name and preview of every deck.
 - [template/](template/) holds the template for new decks and describes its components.
 

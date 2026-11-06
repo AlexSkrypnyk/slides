@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Five Years Late, Still On Time: mentalhealthonline.org.au Drupal 8 to 11 journey</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    html, body { margin: 0; padding: 0; }
+
+    body { background: #030D1E; scroll-snap-type: y mandatory; overflow-y: scroll; height: 100vh; }
+
+    .slide { scroll-snap-align: start; scroll-snap-stop: always; height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2vh 2vw; }
+
+    .slide img { display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; box-shadow: 0 6px 30px rgba(0, 0, 0, 0.45); }
+
+    .slide-number {
+      position: fixed; bottom: 1rem; right: 1.5rem; font: 500 0.7rem ui-monospace, Menlo, monospace;
+      color: #ABBCD5; background: rgba(3, 13, 30, 0.7); padding: 0.25rem 0.55rem; letter-spacing: 0.06em;
+      pointer-events: none; user-select: none;
+    }
+
+    @media print {
+      @page { size: landscape; margin: 0; }
+      body { background: none; height: auto; overflow: visible; scroll-snap-type: none; }
+      .slide { height: auto; padding: 0; page-break-after: always; }
+      .slide img { box-shadow: none; }
+      .slide-number { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<section class="slide"><img src="slides/page-01.png" alt="Slide 1" loading="eager"></section>
+<section class="slide"><img src="slides/page-02.png" alt="Slide 2" loading="eager"></section>
+<section class="slide"><img src="slides/page-03.png" alt="Slide 3" loading="lazy"></section>
+<section class="slide"><img src="slides/page-04.png" alt="Slide 4" loading="lazy"></section>
+<section class="slide"><img src="slides/page-05.png" alt="Slide 5" loading="lazy"></section>
+<section class="slide"><img src="slides/page-06.png" alt="Slide 6" loading="lazy"></section>
+<section class="slide"><img src="slides/page-07.png" alt="Slide 7" loading="lazy"></section>
+<section class="slide"><img src="slides/page-08.png" alt="Slide 8" loading="lazy"></section>
+<section class="slide"><img src="slides/page-09.png" alt="Slide 9" loading="lazy"></section>
+<section class="slide"><img src="slides/page-10.png" alt="Slide 10" loading="lazy"></section>
+<section class="slide"><img src="slides/page-11.png" alt="Slide 11" loading="lazy"></section>
+<section class="slide"><img src="slides/page-12.png" alt="Slide 12" loading="lazy"></section>
+<section class="slide"><img src="slides/page-13.png" alt="Slide 13" loading="lazy"></section>
+<section class="slide"><img src="slides/page-14.png" alt="Slide 14" loading="lazy"></section>
+<section class="slide"><img src="slides/page-15.png" alt="Slide 15" loading="lazy"></section>
+<section class="slide"><img src="slides/page-16.png" alt="Slide 16" loading="lazy"></section>
+<section class="slide"><img src="slides/page-17.png" alt="Slide 17" loading="lazy"></section>
+<section class="slide"><img src="slides/page-18.png" alt="Slide 18" loading="lazy"></section>
+<section class="slide"><img src="slides/page-19.png" alt="Slide 19" loading="lazy"></section>
+<section class="slide"><img src="slides/page-20.png" alt="Slide 20" loading="lazy"></section>
+<section class="slide"><img src="slides/page-21.png" alt="Slide 21" loading="lazy"></section>
+<section class="slide"><img src="slides/page-22.png" alt="Slide 22" loading="lazy"></section>
+<section class="slide"><img src="slides/page-23.png" alt="Slide 23" loading="lazy"></section>
+<section class="slide"><img src="slides/page-24.png" alt="Slide 24" loading="lazy"></section>
+<section class="slide"><img src="slides/page-25.png" alt="Slide 25" loading="lazy"></section>
+<section class="slide"><img src="slides/page-26.png" alt="Slide 26" loading="lazy"></section>
+<section class="slide"><img src="slides/page-27.png" alt="Slide 27" loading="lazy"></section>
+<section class="slide"><img src="slides/page-28.png" alt="Slide 28" loading="lazy"></section>
+<section class="slide"><img src="slides/page-29.png" alt="Slide 29" loading="lazy"></section>
+<section class="slide"><img src="slides/page-30.png" alt="Slide 30" loading="lazy"></section>
+<section class="slide"><img src="slides/page-31.png" alt="Slide 31" loading="lazy"></section>
+<section class="slide"><img src="slides/page-32.png" alt="Slide 32" loading="lazy"></section>
+
+<div class="slide-number" id="slideNumber"></div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const numberEl = document.getElementById('slideNumber');
+
+  function current() {
+    return Math.round(window.scrollY / window.innerHeight);
+  }
+
+  function updateNumber() {
+    numberEl.textContent = (current() + 1) + ' / ' + slides.length;
+  }
+
+  function goTo(index) {
+    const target = Math.max(0, Math.min(slides.length - 1, index));
+    window.scrollTo({ top: target * window.innerHeight, behavior: 'smooth' });
+  }
+
+  updateNumber();
+  window.addEventListener('scroll', updateNumber, { passive: true });
+  window.addEventListener('resize', updateNumber);
+
+  document.addEventListener('keydown', (e) => {
+    const advance = ['ArrowDown', 'ArrowRight', 'PageDown', ' '];
+    const retreat = ['ArrowUp', 'ArrowLeft', 'PageUp'];
+
+    if (advance.includes(e.key)) { e.preventDefault(); goTo(current() + 1); }
+    else if (retreat.includes(e.key)) { e.preventDefault(); goTo(current() - 1); }
+    else if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+    else if (e.key === 'End') { e.preventDefault(); goTo(slides.length - 1); }
+    else if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) { document.documentElement.requestFullscreen?.(); }
+      else { document.exitFullscreen?.(); }
+    }
+  });
+</script>
+
+</body>
+</html>
